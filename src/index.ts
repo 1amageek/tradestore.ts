@@ -1,5 +1,5 @@
 import * as firebase from 'firebase-admin'
-import { DocumentType, DataRepresentable, Collection } from '@1amageek/ballcap-admin'
+import { DocumentType, DataRepresentable, Collection, File } from '@1amageek/ballcap-admin'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
 import { Currency } from './Currency'
 export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult }
