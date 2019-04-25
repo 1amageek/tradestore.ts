@@ -7,8 +7,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2015",
-    "experimentalDecorators": true,
-    "allowJs": true,
+    "experimentalDecorators": true
   },
   "compileOnSave": true,
   "include": [
