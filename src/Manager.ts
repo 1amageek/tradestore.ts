@@ -16,7 +16,7 @@ import {
     UserProtocol,
     PaymentDelegate,
     TradeDelegate,
-    InventoryStockProtocol,
+    StockProtocol,
     PayoutProtocol
 } from "./index"
 
@@ -75,7 +75,7 @@ export type PayoutResult = {
 
 export class Manager
     <
-    InventoryStock extends InventoryStockProtocol,
+    InventoryStock extends StockProtocol,
     SKU extends SKUProtocol<InventoryStock>,
     OrderItem extends OrderItemProtocol,
     Order extends OrderProtocol<OrderItem>,
