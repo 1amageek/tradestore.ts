@@ -1,4 +1,4 @@
-import { Doc, Field, Timestamp } from '@1amageek/ballcap-admin'
+import { Doc, Field, Timestamp, File } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import { OrderItem } from './orderItem'
 import { } from "reflect-metadata"

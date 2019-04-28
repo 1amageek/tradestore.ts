@@ -1,4 +1,4 @@
-import { Doc, Field, Collection } from '@1amageek/ballcap-admin'
+import { Doc, Field } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import { } from "reflect-metadata";
 

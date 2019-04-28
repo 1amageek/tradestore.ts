@@ -12,11 +12,9 @@ import { InventoryStock } from './models/inventoryStock'
 import { SKU } from './models/sku'
 import { Order } from './models/order'
 import { OrderItem } from './models/orderItem'
-import { Item } from './models/item'
 import { TradeTransaction } from './models/tradeTransaction'
 import { Account } from './models/account'
 import { OrderManager } from '../src/OrderManager'
-import { BalanceTransaction } from './models/BalanceTransaction'
 
 
 export const stripe = new Stripe(Config.STRIPE_API_KEY)
@@ -33,12 +31,12 @@ describe("OrderManager", () => {
     const user: User = new User()
     const product: Product = new Product()
     const sku: SKU = new SKU()
-    const account: Account = new Account(shop.id, {})
+    const account: Account = new Account(shop.id)
     const order: Order = new Order()
     const date: Date = new Date()
     const orderItem: OrderItem = new OrderItem()
 
-    const orderManager: OrderManager<Order, OrderItem, User, TradeTransaction> = new OrderManager(User, Order)
+    const orderManager: OrderManager<Order, OrderItem, User, TradeTransaction> = new OrderManager(User.self())
 
     beforeAll(async () => {
         product.name = "PRODUCT"
@@ -48,7 +46,7 @@ describe("OrderManager", () => {
         sku.title = "sku"
         sku.selledBy = shop.id
         sku.createdBy = shop.id
-        sku.product = product.reference
+        sku.product = product.documentReference
         sku.amount = 100
         sku.currency = Tradable.Currency.JPY
         sku.inventory = {
@@ -81,14 +79,14 @@ describe("OrderManager", () => {
         await Promise.all([user.save(), sku.save(), product.save(), shop.save()])
     })
 
-    describe("update", async () => {
+    describe("update", () => {
         test("Success", async () => {
-            const result = await Pring.firestore.runTransaction(async (transaction) => {
+            await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
                     orderManager.update(order, {}, {}, transaction)
                     resolve()
                 })
-            }) as BalanceTransaction
+            })
 
             const userOrder = await user.orders.doc(order.id, Order).fetch() as Order
             const shopOrder = await shop.receivedOrders.doc(order.id, Order).fetch() as Order

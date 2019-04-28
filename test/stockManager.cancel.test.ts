@@ -14,7 +14,6 @@ import { Order } from './models/order'
 import { OrderItem } from './models/orderItem'
 import { Item } from './models/item'
 import { TradeTransaction } from './models/tradeTransaction'
-import { Account } from './models/account'
 import { StockManager } from '../src/StockManager'
 import { TradeDelegate } from './tradeDelegate'
 
@@ -36,8 +35,6 @@ describe("StockManager", () => {
     const order: Order = new Order()
     const date: Date = new Date()
     const orderItem: OrderItem = new OrderItem()
-
-    let transactionID: string
 
     const stockManager: StockManager<Order, OrderItem, User, InventoryStock, SKU, TradeTransaction> = new StockManager(User.self(), InventoryStock.self(), SKU.self(), TradeTransaction.self())
 
@@ -85,40 +82,32 @@ describe("StockManager", () => {
         stockManager.delegate = new TradeDelegate()
     })
 
-    describe("OrderCancel", async () => {
+    describe("OrderCancel", () => {
 
         let orderResult: TradeTransaction | undefined = undefined
 
         test("Success", async () => {
             try {
-                const result = await Pring.firestore.runTransaction(async (transaction) => {
+                const result = await firestore.runTransaction(async (transaction) => {
                     return new Promise(async (resolve, reject) => {
-                        const tradeInformation = {
-                            selledBy: shop.id,
-                            purchasedBy: user.id,
-                            order: order.id,
-                            sku: sku.id,
-                            product: product.documentReference
-                        }
                         const stockTransaction = await stockManager._trade(order, orderItem, transaction)
                         const result = await stockTransaction.commit()
                         resolve(result)
                     })
                 }) as TradeTransaction[]
 
-                transactionID = result[0].id
-
                 orderResult = result[0]
-
-                const shopTradeTransaction = (await shop.tradeTransactions.query(TradeTransaction).orderBy("createdAt").dataSource().get())[0]
-                const userTradeTransaction = (await user.tradeTransactions.query(TradeTransaction).orderBy("createdAt").dataSource().get())[0]
-                const _product: Product = new Product(product.id)
+            
+                const shopTradeTransaction: TradeTransaction  = (await shop.tradeTransactions.collectionReference.orderBy("createdAt").get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
+                const userTradeTransaction: TradeTransaction = (await user.tradeTransactions.collectionReference.orderBy("createdAt").get()).docs.map(value => User.fromSnapshot(value) as TradeTransaction)[0]
                 const _sku = new SKU(sku.id)
-                const inventoryStocksDataSource = _sku.inventoryStocks.query(InventoryStock).where("order", "==", orderResult.order).dataSource()
-                const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get(), shopTradeTransaction.fetch(), userTradeTransaction.fetch()])
-                const inventoryStocks: InventoryStock[] = promiseResult[1]
+                const inventoryStocksDataSource = _sku.inventoryStocks.collectionReference.where("order", "==", orderResult.order)
+                const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get()])
+                const inventoryStocks: InventoryStock[] = promiseResult[1].docs.map( value => InventoryStock.fromSnapshot(value))
 
-                const _item = (await user.items.get(Item))[0]
+                const _item = (await user.items.collectionReference.get()).docs.map(value => Item.fromSnapshot(value) as Item)[0]
+
+
 
                 // Shop Trade Transaction
                 expect(shopTradeTransaction.type).toEqual(Tradable.TradeTransactionType.order)
@@ -157,25 +146,19 @@ describe("StockManager", () => {
 		
 		test("Success", async () => {
 
-            const result = await Pring.firestore.runTransaction(async (transaction) => {
-                const tradeInformation = {
-                    selledBy: shop.id,
-                    purchasedBy: user.id,
-                    order: order.id,
-                    sku: sku.id,
-                    product: product.documentReference
-                };
+            const result = await firestore.runTransaction(async (transaction) => {
                 const stockTransaction = await stockManager.cancel(order, orderItem, transaction)
                 return await stockTransaction.commit()
             }) as TradeTransaction[]
 
+            console.log(result)
+
 			const shopTradeTransaction = (await shop.tradeTransactions.doc(result[0].id, TradeTransaction).fetch())
 			const userTradeTransaction = (await user.tradeTransactions.doc(result[0].id, TradeTransaction).fetch())
-			const _product: Product = new Product(product.id)
 			const _sku = new SKU(sku.id)
-			const inventoryStocksDataSource = _sku.inventoryStocks.query(InventoryStock).where("isAvailabled", "==", true).dataSource()
+			const inventoryStocksDataSource = _sku.inventoryStocks.collectionReference.where("isAvailabled", "==", true)
 			const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get(), shopTradeTransaction.fetch(), userTradeTransaction.fetch()])
-			const inventoryStocks: InventoryStock[] = promiseResult[1]
+			const inventoryStocks: InventoryStock[] = promiseResult[1].docs.map(value => InventoryStock.fromSnapshot(value))
 			const _item = await user.items.doc(orderResult!.item.id, Item).fetch()
 
 			// Shop Trade Transaction
@@ -211,5 +194,6 @@ describe("StockManager", () => {
 
     afterAll(async () => {
         await Promise.all([shop.delete(), user.delete(), product.delete(), sku.delete()])
+        app.delete()
     })
 })

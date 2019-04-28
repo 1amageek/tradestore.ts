@@ -1,4 +1,4 @@
-import { Doc, Field, Collection } from '@1amageek/ballcap-admin'
+import { Doc, Field, SubCollection, Collection } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import { BalanceTransaction } from './BalanceTransaction'
 import { Payout } from './payout';
@@ -14,7 +14,8 @@ export class Account extends Doc implements tradable.AccountProtocol<BalanceTran
     @Field revenue: { [currency: string]: number } = {}
     @Field sales: { [currency: string]: number } = {}
     @Field balance: tradable.Balance = { available: {}, pending: {}}
-    @Field balanceTransactions: Collection<BalanceTransaction> = new Collection()
     @Field accountInformation: { [key: string]: any } = {}
-    @Field payoutRequests: Collection<Payout> = new Collection()
+
+    @SubCollection balanceTransactions: Collection<BalanceTransaction> = new Collection()
+    @SubCollection payoutRequests: Collection<Payout> = new Collection()
 }

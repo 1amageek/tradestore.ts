@@ -71,10 +71,10 @@ export class StockManager
         if (skuID) {
             const sku: SKU = await this._SKU.init(skuID).fetch(transaction)
             if (!sku) {
-                throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
+                throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
             }
             if (!sku.isAvailabled) {
-                throw new TradableError(TradableErrorCode.outOfStock, `[Manager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is not availabled`)
+                throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is not availabled`)
             }
             this.delegate.reserve(order, orderItem, transaction)
         }
@@ -87,7 +87,7 @@ export class StockManager
             const skuID = orderItem.sku
             if (orderItem.type === OrderItemType.sku) {
                 if (!skuID) {
-                    throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ORDER/${order.id}, This order item is sku required.`)
+                    throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${order.id}, This order item is sku required.`)
                 }
                 const task = this._trade(order, orderItem, transaction)
                 tasks.push(task)
@@ -103,15 +103,15 @@ export class StockManager
         const sku: SKU = await this._SKU.init(skuID).fetch(transaction)
         
         if (!sku) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
+            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
         }
         if (!sku.isAvailabled) {
-            throw new TradableError(TradableErrorCode.outOfStock, `[Manager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is not availabled`)
+            throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is not availabled`)
         }
         const stockValue: StockValue | undefined = sku.inventory.value
         const stockType = sku.inventory.type
         if (!stockType) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] ORDER/${orderID}. SKU: ${skuID}. Invalid StockType.`)
+            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] ORDER/${orderID}. SKU: ${skuID}. Invalid StockType.`)
         }
         const stockTransaction: StockTransaction<InventoryStock, TradeTransaction> = new StockTransaction()
 
@@ -123,7 +123,7 @@ export class StockManager
                 return stock
             })
             if (inventoryStocks.length < quantity) {
-                throw new TradableError(TradableErrorCode.outOfStock, `[Manager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is out of stock. stocks count ${inventoryStocks.length}`)
+                throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is out of stock. stocks count ${inventoryStocks.length}`)
             }
             const tasks = []
             const stockIDs = inventoryStocks.map(stock => { return stock.id })
@@ -138,7 +138,7 @@ export class StockManager
                     }
                     tasks.push(task())
                 } else {
-                    throw new TradableError(TradableErrorCode.outOfStock, `[Manager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is out of stock`)
+                    throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is out of stock`)
                 }
             }
             const result = await Promise.all(tasks)
@@ -173,7 +173,7 @@ export class StockManager
                                 "order": orderID
                             }, { merge: true })
                         } else {
-                            throw new TradableError(TradableErrorCode.invalidShard, `[Manager] Invalid order ORDER/${orderID}. SKU/${skuID} InventoryStock/${inventoryStock.id} InventoryStock is not availabled`)
+                            throw new TradableError(TradableErrorCode.invalidShard, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} InventoryStock/${inventoryStock.id} InventoryStock is not availabled`)
                         }
                         break
                     }
@@ -184,13 +184,13 @@ export class StockManager
                     }
                     case StockType.bucket: {
                         if (!stockValue) {
-                            throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] ORDER/${orderID}. SKU: ${skuID}. Invalid StockValue.`)
+                            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] ORDER/${orderID}. SKU: ${skuID}. Invalid StockValue.`)
                         }
                         if (stockValue !== StockValue.outOfStock) {
                             const item = this.delegate.createItem(order, orderItem, undefined, transaction)
                             tradeTransaction.item = item
                         } else {
-                            throw new TradableError(TradableErrorCode.invalidShard, `[Manager] Invalid order ORDER/${orderID}. SKU/${skuID} StockValue is out of stock.`)
+                            throw new TradableError(TradableErrorCode.invalidShard, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} StockValue is out of stock.`)
                         }
                         break
                     }
@@ -216,7 +216,7 @@ export class StockManager
         const sku: SKU = this._SKU.init(skuID)
         const result = await Promise.all([sku.fetch(transaction), this.delegate.getItems(order, orderItem, transaction)])
         if (!sku) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
+            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
         }
         const items = result[1].docs
         const stockType = sku.inventory.type
@@ -267,7 +267,7 @@ export class StockManager
         const inventoryStocks = snapshot.docs
 
         if (!sku) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
+            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
         }
 
         const stockType = sku.inventory.type

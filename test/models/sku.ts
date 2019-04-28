@@ -1,4 +1,4 @@
-import { Doc, Field, Collection } from '@1amageek/ballcap-admin'
+import { Doc, Field, Collection, SubCollection } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import { InventoryStock } from './inventoryStock'
 import { } from "reflect-metadata";
@@ -18,5 +18,6 @@ export class SKU extends Doc implements tradable.SKUProtocol<InventoryStock> {
     @Field isOutOfStock: boolean = false
     @Field isAvailabled: boolean = true
     @Field numberOfFetch: number = 2
-    @Field inventoryStocks: Collection<InventoryStock> = new Collection()
+    
+    @SubCollection inventoryStocks: Collection<InventoryStock> = new Collection()
 }

@@ -78,7 +78,7 @@ describe("BalanceManager", () => {
         await Promise.all([order.save(), sku.save(), product.save(), shop.save(), user.save()])
     })
 
-    describe("payment", async () => {
+    describe("payment", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -97,8 +97,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(order.purchasedBy)
             expect(systemBalanceTransaction.to).toEqual(BalanceManager.platform)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
             // Account Trade Transaction
@@ -107,14 +107,14 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(order.purchasedBy)
             expect(accountBalanceTransaction.to).toEqual(BalanceManager.platform)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("refund", async () => {
+    describe("refund", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -133,8 +133,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(BalanceManager.platform)
             expect(systemBalanceTransaction.to).toEqual(order.purchasedBy)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -144,14 +144,14 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(BalanceManager.platform)
             expect(accountBalanceTransaction.to).toEqual(order.purchasedBy)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("transfer platfomr -> user", async () => {
+    describe("transfer platfomr -> user", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -173,8 +173,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(BalanceManager.platform)
             expect(systemBalanceTransaction.to).toEqual(order.selledBy)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -184,14 +184,14 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(BalanceManager.platform)
             expect(accountBalanceTransaction.to).toEqual(order.selledBy)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("transferRefund user -> platform", async () => {
+    describe("transferRefund user -> platform", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -213,8 +213,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(order.selledBy)
             expect(systemBalanceTransaction.to).toEqual(BalanceManager.platform)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -224,14 +224,14 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(order.selledBy)
             expect(accountBalanceTransaction.to).toEqual(BalanceManager.platform)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("transfer user -> platform", async () => {
+    describe("transfer user -> platform", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -253,8 +253,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(order.selledBy)
             expect(systemBalanceTransaction.to).toEqual(BalanceManager.platform)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -264,14 +264,14 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(order.selledBy)
             expect(accountBalanceTransaction.to).toEqual(BalanceManager.platform)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("transferRefund platfrom -> user", async () => {
+    describe("transferRefund platfrom -> user", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -293,8 +293,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(BalanceManager.platform)
             expect(systemBalanceTransaction.to).toEqual(order.selledBy)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -304,14 +304,14 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(BalanceManager.platform)
             expect(accountBalanceTransaction.to).toEqual(order.selledBy)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("transfer user -> user", async () => {
+    describe("transfer user -> user", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -336,8 +336,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(order.purchasedBy)
             expect(systemBalanceTransaction.to).toEqual(order.selledBy)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -347,8 +347,8 @@ describe("BalanceManager", () => {
             expect(fromBalanceTransaction.amount).toEqual(order.amount)
             expect(fromBalanceTransaction.from).toEqual(order.purchasedBy)
             expect(fromBalanceTransaction.to).toEqual(order.selledBy)
-            expect(fromBalanceTransaction.transfer).toBeUndefined()
-            expect(fromBalanceTransaction.payout).toBeUndefined()
+            expect(fromBalanceTransaction.transfer).toBeNull()
+            expect(fromBalanceTransaction.payout).toBeNull()
             expect(fromBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
             expect(toBalanceTransaction.type).toEqual(Tradable.BalanceTransactionType.transfer)
@@ -356,14 +356,14 @@ describe("BalanceManager", () => {
             expect(toBalanceTransaction.amount).toEqual(order.amount)
             expect(toBalanceTransaction.from).toEqual(order.purchasedBy)
             expect(toBalanceTransaction.to).toEqual(order.selledBy)
-            expect(toBalanceTransaction.transfer).toBeUndefined()
-            expect(toBalanceTransaction.payout).toBeUndefined()
+            expect(toBalanceTransaction.transfer).toBeNull()
+            expect(toBalanceTransaction.payout).toBeNull()
             expect(toBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("transferRefund user -> user", async () => {
+    describe("transferRefund user -> user", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -388,8 +388,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(order.selledBy)
             expect(systemBalanceTransaction.to).toEqual(order.purchasedBy)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -399,8 +399,8 @@ describe("BalanceManager", () => {
             expect(fromBalanceTransaction.amount).toEqual(order.amount)
             expect(fromBalanceTransaction.from).toEqual(order.selledBy)
             expect(fromBalanceTransaction.to).toEqual(order.purchasedBy)
-            expect(fromBalanceTransaction.transfer).toBeUndefined()
-            expect(fromBalanceTransaction.payout).toBeUndefined()
+            expect(fromBalanceTransaction.transfer).toBeNull()
+            expect(fromBalanceTransaction.payout).toBeNull()
             expect(fromBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
             expect(toBalanceTransaction.type).toEqual(Tradable.BalanceTransactionType.transferRefund)
@@ -408,14 +408,14 @@ describe("BalanceManager", () => {
             expect(toBalanceTransaction.amount).toEqual(order.amount)
             expect(toBalanceTransaction.from).toEqual(order.selledBy)
             expect(toBalanceTransaction.to).toEqual(order.purchasedBy)
-            expect(toBalanceTransaction.transfer).toBeUndefined()
-            expect(toBalanceTransaction.payout).toBeUndefined()
+            expect(toBalanceTransaction.transfer).toBeNull()
+            expect(toBalanceTransaction.payout).toBeNull()
             expect(toBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("payout", async () => {
+    describe("payout", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -437,8 +437,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(order.selledBy)
             expect(systemBalanceTransaction.to).toEqual(BalanceManager.bankAccount)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -448,14 +448,14 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(order.selledBy)
             expect(accountBalanceTransaction.to).toEqual(BalanceManager.bankAccount)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
     })
 
-    describe("payoutCancel", async () => {
+    describe("payoutCancel", () => {
         test("Success", async () => {
             const result = await firestore.runTransaction(async (transaction) => {
                 return new Promise(async (resolve, reject) => {
@@ -477,8 +477,8 @@ describe("BalanceManager", () => {
             expect(systemBalanceTransaction.amount).toEqual(order.amount)
             expect(systemBalanceTransaction.from).toEqual(BalanceManager.bankAccount)
             expect(systemBalanceTransaction.to).toEqual(order.selledBy)
-            expect(systemBalanceTransaction.transfer).toBeUndefined()
-            expect(systemBalanceTransaction.payout).toBeUndefined()
+            expect(systemBalanceTransaction.transfer).toBeNull()
+            expect(systemBalanceTransaction.payout).toBeNull()
             expect(systemBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
 
@@ -488,8 +488,8 @@ describe("BalanceManager", () => {
             expect(accountBalanceTransaction.amount).toEqual(order.amount)
             expect(accountBalanceTransaction.from).toEqual(BalanceManager.bankAccount)
             expect(accountBalanceTransaction.to).toEqual(order.selledBy)
-            expect(accountBalanceTransaction.transfer).toBeUndefined()
-            expect(accountBalanceTransaction.payout).toBeUndefined()
+            expect(accountBalanceTransaction.transfer).toBeNull()
+            expect(accountBalanceTransaction.payout).toBeNull()
             expect(accountBalanceTransaction.transactionResults[0]).toEqual({"result": "result"})
 
         }, 15000)
