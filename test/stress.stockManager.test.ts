@@ -8,7 +8,7 @@ import * as Stripe from 'stripe'
 
 import { User } from './models/user'
 import { Product } from './models/product'
-import { InventoryStock } from './models/inventoryStock'
+import { Stock } from './models/stock'
 import { SKU } from './models/sku'
 import { Order } from './models/order'
 import { OrderItem } from './models/orderItem'
@@ -35,7 +35,7 @@ describe("StockManager", () => {
 
 	let transactionID: string
 
-	const stockManager: StockManager<Order, OrderItem, User, InventoryStock, SKU, TradeTransaction> = new StockManager(User, InventoryStock, SKU, TradeTransaction)
+	const stockManager: StockManager<Order, OrderItem, User, Stock, SKU, TradeTransaction> = new StockManager(User, Stock, SKU, TradeTransaction)
 
 	beforeAll(async () => {
 
@@ -54,8 +54,8 @@ describe("StockManager", () => {
 			quantity: 10
 		}
 		for (let i = 0; i < sku.inventory.quantity!; i++) {
-			const inventoryStock: InventoryStock = new InventoryStock(`${i}`)
-			sku.inventoryStocks.push(inventoryStock)
+			const inventoryStock: Stock = new Stock(`${i}`)
+			sku.stocks.push(inventoryStock)
 		}
 
 		await Promise.all([user.save(), sku.save(), product.save(), shop.save()])
@@ -123,10 +123,10 @@ describe("StockManager", () => {
 					tasks.push(test())
 				}
 				await Promise.all(tasks)
-				const result = await sku.inventoryStocks.query(InventoryStock).where("isAvailabled", "==", false).dataSource().get()
+				const result = await sku.stocks.query(Stock).where("isAvailabled", "==", false).dataSource().get()
 				expect(successCount).toEqual(result.length)
 			} catch (error) {
-				const result = await sku.inventoryStocks.query(InventoryStock).where("isAvailabled", "==", false).dataSource().get()
+				const result = await sku.stocks.query(Stock).where("isAvailabled", "==", false).dataSource().get()
 				expect(successCount).toEqual(result.length)
 				console.log(error)
 			}

@@ -8,7 +8,7 @@ import * as Stripe from 'stripe'
 
 import { User } from './models/user'
 import { Product } from './models/product'
-import { InventoryStock } from './models/inventoryStock'
+import { Stock } from './models/stock'
 import { SKU } from './models/sku'
 import { Order } from './models/order'
 import { OrderItem } from './models/orderItem'
@@ -36,7 +36,7 @@ describe("StockManager", () => {
     const date: Date = new Date()
     const orderItem: OrderItem = new OrderItem()
 
-    const stockManager: StockManager<Order, OrderItem, User, InventoryStock, SKU, TradeTransaction> = new StockManager(User.self(), InventoryStock.self(), SKU.self(), TradeTransaction.self())
+    const stockManager: StockManager<Order, OrderItem, User, Stock, SKU, TradeTransaction> = new StockManager(User.self(), Stock.self(), SKU.self(), TradeTransaction.self())
 
     beforeAll(async () => {
 
@@ -55,7 +55,7 @@ describe("StockManager", () => {
             quantity: 2
         }
         for (let i = 0; i < sku.inventory.quantity!; i++) {
-            const inventoryStock: InventoryStock = new InventoryStock(`${i}`)
+            const inventoryStock: Stock = new Stock(`${i}`)
             sku.inventoryStocks.push(inventoryStock)
         }
 
@@ -101,9 +101,9 @@ describe("StockManager", () => {
                 const shopTradeTransaction: TradeTransaction  = (await shop.tradeTransactions.collectionReference.orderBy("createdAt").get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
                 const userTradeTransaction: TradeTransaction = (await user.tradeTransactions.collectionReference.orderBy("createdAt").get()).docs.map(value => User.fromSnapshot(value) as TradeTransaction)[0]
                 const _sku = new SKU(sku.id)
-                const inventoryStocksDataSource = _sku.inventoryStocks.collectionReference.where("order", "==", orderResult.order)
+                const inventoryStocksDataSource = _sku.stocks.collectionReference.where("order", "==", orderResult.order)
                 const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get()])
-                const inventoryStocks: InventoryStock[] = promiseResult[1].docs.map( value => InventoryStock.fromSnapshot(value))
+                const inventoryStocks: Stock[] = promiseResult[1].docs.map( value => Stock.fromSnapshot(value))
 
                 const _item = (await user.items.collectionReference.get()).docs.map(value => Item.fromSnapshot(value) as Item)[0]
 
@@ -158,7 +158,7 @@ describe("StockManager", () => {
 			const _sku = new SKU(sku.id)
 			const inventoryStocksDataSource = _sku.inventoryStocks.collectionReference.where("isAvailabled", "==", true)
 			const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get(), shopTradeTransaction.fetch(), userTradeTransaction.fetch()])
-			const inventoryStocks: InventoryStock[] = promiseResult[1].docs.map(value => InventoryStock.fromSnapshot(value))
+			const inventoryStocks: Stock[] = promiseResult[1].docs.map(value => Stock.fromSnapshot(value))
 			const _item = await user.items.doc(orderResult!.item.id, Item).fetch()
 
 			// Shop Trade Transaction

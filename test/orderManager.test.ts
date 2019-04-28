@@ -8,7 +8,7 @@ import * as Stripe from 'stripe'
 
 import { User } from './models/user'
 import { Product } from './models/product'
-import { InventoryStock } from './models/inventoryStock'
+import { Stock } from './models/stock'
 import { SKU } from './models/sku'
 import { Order } from './models/order'
 import { OrderItem } from './models/orderItem'
@@ -55,8 +55,8 @@ describe("OrderManager", () => {
         }
 
         for (let i = 0; i < 1; i++) {
-            const shard: InventoryStock = new InventoryStock(`${i}`)
-            sku.inventoryStocks.push(shard)
+            const shard: Stock = new Stock(`${i}`)
+            sku.stocks.push(shard)
         }
 
         orderItem.order = order.id

@@ -55,7 +55,7 @@ export interface TradeTransactionProtocol extends DocumentType {
     order: string
     product?: firebase.firestore.DocumentReference
     sku: string
-    inventoryStock?: string
+    stock?: string
     item: firebase.firestore.DocumentReference
 }
 
@@ -107,16 +107,16 @@ export type Inventory = {
     value?: StockValue
 }
 
-export interface InventoryStockProtocol extends DocumentType {
+export interface StockProtocol extends DocumentType {
     isAvailabled: boolean
-    SKU: string
+    SKU: firebase.firestore.DocumentReference
     order?: string
     item?: firebase.firestore.DocumentReference
 }
 
 // SKU
 
-export interface SKUProtocol<InventoryStock extends InventoryStockProtocol> extends DocumentType {
+export interface SKUProtocol<Stock extends StockProtocol> extends DocumentType {
     selledBy: string
     createdBy: string
     product?: firebase.firestore.DocumentReference
@@ -127,7 +127,7 @@ export interface SKUProtocol<InventoryStock extends InventoryStockProtocol> exte
 
     /// Maximum number of fetches to acquire at one time
     numberOfFetch: number
-    inventoryStocks: Collection<InventoryStock>
+    stocks: Collection<Stock>
 }
 
 // Order
@@ -196,8 +196,6 @@ export interface OrderItemProtocol extends DataRepresentable {
 
 export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends DocumentType {
     parentID?: string
-    title?: string
-    assets: File[]
     purchasedBy: string
     selledBy: string
     shippingTo: { [key: string]: string }
@@ -220,7 +218,7 @@ export interface ItemProtocol {
     purchasedBy: string
     product?: firebase.firestore.DocumentReference
     sku: string
-    inventoryStock?: string
+    stock?: string
     isCancelled: boolean
 }
 
@@ -298,7 +296,7 @@ export interface TradeDelegate {
     cancelItem<T extends OrderItemProtocol, U extends OrderProtocol<T>>(order: U, orderItem: T, item: firebase.firestore.DocumentReference, transaction: firebase.firestore.Transaction): void
 }
 
-export interface TransactionDelegate {
+export interface PaymentDelegate {
 
     authorize<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: PaymentOptions): Promise<any>
 

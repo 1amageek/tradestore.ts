@@ -8,7 +8,7 @@ import * as Stripe from 'stripe'
 
 import { User } from './models/user'
 import { Product } from './models/product'
-import { InventoryStock } from './models/inventoryStock'
+import { Stock } from './models/stock'
 import { SKU } from './models/sku'
 import { Order } from './models/order'
 import { OrderItem } from './models/orderItem'
@@ -55,8 +55,8 @@ describe("Manager", () => {
         }
 
         for (let i = 0; i < sku.inventory.quantity!; i++) {
-            const shard: InventoryStock = new InventoryStock(`${i}`)
-            sku.inventoryStocks.push(shard)
+            const shard: Stock = new Stock(`${i}`)
+            sku.stocks.push(shard)
         }
 
         await Promise.all([product.save(), sku.save(), shop.save(), user.save()])
@@ -65,7 +65,7 @@ describe("Manager", () => {
     describe("order", async () => {
         test("Success", async () => {
 
-            const manager: Tradable.Manager<InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
+            const manager: Tradable.Manager<Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
             manager.delegate = new StripePaymentDelegate()
             manager.tradeDelegate = new TradeDelegate()
 
@@ -103,9 +103,9 @@ describe("Manager", () => {
             const userTradeTransaction = (await user.tradeTransactions.get(TradeTransaction))[0]
             const _product: Product = new Product(product.id)
             const _sku = new SKU(sku.id)
-            const inventoryStocksDataSource = _sku.inventoryStocks.query(InventoryStock).where("isAvailabled", "==", false).dataSource()
-            const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get()])
-            const inventoryStocks: InventoryStock[] = promiseResult[1]
+            const stocksDataSource = _sku.stocks.query(Stock).where("isAvailabled", "==", false).dataSource()
+            const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get()])
+            const stocks: Stock[] = promiseResult[1]
             const _item = (await user.items.get(Item))[0]
 
             // Shop Trade Transaction
@@ -127,7 +127,7 @@ describe("Manager", () => {
             // SKU
             expect(_sku.inventory.type).toEqual(Tradable.StockType.finite)
             expect(_sku.inventory.quantity).toEqual(5)
-            expect(inventoryStocks.length).toEqual(1)
+            expect(stocks.length).toEqual(1)
 
             // Item
             expect(_item.order).toEqual(order.id)
@@ -163,7 +163,7 @@ describe("Manager", () => {
 
         test("Out of stock", async () => {
 
-            const manager: Tradable.Manager<InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
+            const manager: Tradable.Manager<Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
             manager.delegate = new StripePaymentDelegate()
             manager.tradeDelegate = new TradeDelegate()
 
@@ -210,7 +210,7 @@ describe("Manager", () => {
 
         test("Invalid Order Status", async () => {
 
-            const manager: Tradable.Manager<InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
+            const manager: Tradable.Manager<Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
             manager.delegate = new StripePaymentDelegate()
             manager.tradeDelegate = new TradeDelegate()
 
@@ -256,7 +256,7 @@ describe("Manager", () => {
 
         test("Invalid Delegate", async () => {
 
-            const manager: Tradable.Manager<InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
+            const manager: Tradable.Manager<Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
 
             const order: Order = new Order()
             const date: Date = new Date()
@@ -299,7 +299,7 @@ describe("Manager", () => {
 
         test("Invalid Stripe charge", async () => {
 
-            const manager: Tradable.Manager<InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(InventoryStock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
+            const manager: Tradable.Manager<Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account> = new Tradable.Manager(Stock, SKU, OrderItem, Order, TradeTransaction, BalanceTransaction, Payout, User, Account)
             manager.delegate = new StripeInvalidPaymentDelegate()
             manager.tradeDelegate = new TradeDelegate()
 

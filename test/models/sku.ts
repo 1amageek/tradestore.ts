@@ -1,11 +1,11 @@
 import { Doc, Field, Collection, SubCollection } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
-import { InventoryStock } from './inventoryStock'
+import { Stock } from './stock'
 import { } from "reflect-metadata";
 
 
 
-export class SKU extends Doc implements tradable.SKUProtocol<InventoryStock> {
+export class SKU extends Doc implements tradable.SKUProtocol<Stock> {
     @Field selledBy!: string
     @Field createdBy!: string
     @Field currency: tradable.Currency = tradable.Currency.JPY
@@ -18,6 +18,6 @@ export class SKU extends Doc implements tradable.SKUProtocol<InventoryStock> {
     @Field isOutOfStock: boolean = false
     @Field isAvailabled: boolean = true
     @Field numberOfFetch: number = 2
-    
-    @SubCollection inventoryStocks: Collection<InventoryStock> = new Collection()
+
+    @SubCollection stocks: Collection<Stock> = new Collection()
 }

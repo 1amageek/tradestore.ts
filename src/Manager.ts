@@ -14,7 +14,7 @@ import {
     TradableErrorCode,
     TradableError,
     UserProtocol,
-    TransactionDelegate,
+    PaymentDelegate,
     TradeDelegate,
     InventoryStockProtocol,
     PayoutProtocol
@@ -103,7 +103,7 @@ export class Manager
 
     public payoutManager: PayoutManager<BalanceTransaction, Payout, Account>
 
-    public delegate?: TransactionDelegate
+    public delegate?: PaymentDelegate
 
     public tradeDelegate?: TradeDelegate
 
@@ -134,7 +134,7 @@ export class Manager
 
     public async runTransaction(documentReference: DocumentReference, option: any, block: (order: Order, option: any, transaction: Transaction) => Promise<any>) {
 
-        const delegate: TransactionDelegate | undefined = this.delegate
+        const delegate: PaymentDelegate | undefined = this.delegate
         if (!delegate) {
             throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ${documentReference.path}, Manager required delegate.`)
         }

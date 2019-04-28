@@ -5,7 +5,7 @@ import * as Config from './config'
 
 export const stripe = new Stripe(Config.STRIPE_API_KEY)
 
-export class StripeInvalidPaymentDelegate implements tradable.TransactionDelegate {
+export class StripeInvalidPaymentDelegate implements tradable.PaymentDelegate {
 
 
     async authorize<U extends tradable.OrderItemProtocol, T extends tradable.OrderProtocol<U>>(currency: tradable.Currency, amount: number, order: T, options: tradable.PaymentOptions) {

@@ -8,7 +8,7 @@ import * as Stripe from 'stripe'
 
 import { User } from './models/user'
 import { Product } from './models/product'
-import { InventoryStock } from './models/inventoryStock'
+import { Stock } from './models/stock'
 import { SKU } from './models/sku'
 import { Order } from './models/order'
 import { OrderItem } from './models/orderItem'
@@ -37,7 +37,7 @@ describe("StockManager", () => {
 
     let transactionID: string
 
-    const stockManager: StockManager<Order, OrderItem, User, InventoryStock, SKU, TradeTransaction> = new StockManager(User, InventoryStock, SKU, TradeTransaction)
+    const stockManager: StockManager<Order, OrderItem, User, Stock, SKU, TradeTransaction> = new StockManager(User, Stock, SKU, TradeTransaction)
 
     beforeAll(async () => {
 
@@ -56,7 +56,7 @@ describe("StockManager", () => {
             quantity: 2
         }
         for (let i = 0; i < sku.inventory.quantity!; i++) {
-            const inventoryStock: InventoryStock = new InventoryStock(`${i}`)
+            const inventoryStock: Stock = new Stock(`${i}`)
             sku.inventoryStocks.push(inventoryStock)
         }
 
@@ -109,9 +109,9 @@ describe("StockManager", () => {
                 const userTradeTransaction = (await user.tradeTransactions.query(TradeTransaction).orderBy("createdAt").dataSource().get())[0]
                 const _product: Product = new Product(product.id)
                 const _sku = new SKU(sku.id)
-                const inventoryStocksDataSource = _sku.inventoryStocks.query(InventoryStock).where("order", "==", result[0].order).dataSource()
+                const inventoryStocksDataSource = _sku.inventoryStocks.query(Stock).where("order", "==", result[0].order).dataSource()
                 const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get(), shopTradeTransaction.fetch(), userTradeTransaction.fetch()])
-                const inventoryStocks: InventoryStock[] = promiseResult[1]
+                const inventoryStocks: Stock[] = promiseResult[1]
 
                 const _item = (await user.items.get(Item))[0]
 
@@ -170,9 +170,9 @@ describe("StockManager", () => {
 
             const _product: Product = new Product(product.id)
             const _sku = new SKU(sku.id)
-            const inventoryStocksDataSource = _sku.inventoryStocks.query(InventoryStock).where("isAvailabled", "==", true).dataSource()
+            const inventoryStocksDataSource = _sku.inventoryStocks.query(Stock).where("isAvailabled", "==", true).dataSource()
             const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get(), shopTradeTransaction.fetch(), userTradeTransaction.fetch()])
-            const inventoryStocks: InventoryStock[] = promiseResult[1]
+            const inventoryStocks: Stock[] = promiseResult[1]
             const _item = await user.items.doc(orderResult!.item.id, Item).fetch()
 
             // Shop Trade Transaction
@@ -232,9 +232,9 @@ describe("StockManager", () => {
                 const userTradeTransaction = (await user.tradeTransactions.doc(orderResult!.id, TradeTransaction).fetch())
                 const _product: Product = new Product(product.id)
                 const _sku = new SKU(sku.id)
-                const inventoryStocksDataSource = _sku.inventoryStocks.query(InventoryStock).where("isAvailabled", "==", true).dataSource()
+                const inventoryStocksDataSource = _sku.inventoryStocks.query(Stock).where("isAvailabled", "==", true).dataSource()
                 const promiseResult = await Promise.all([_sku.fetch(), inventoryStocksDataSource.get(), shopTradeTransaction.fetch(), userTradeTransaction.fetch()])
-                const inventoryStocks: InventoryStock[] = promiseResult[1]
+                const inventoryStocks: Stock[] = promiseResult[1]
                 const _item = await user.items.doc(orderResult!.item.id, Item).fetch()
 
                 // Shop Trade Transaction

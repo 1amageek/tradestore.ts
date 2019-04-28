@@ -10,7 +10,7 @@ import {
     TradeDelegate,
     TradableError,
     TradableErrorCode,
-    InventoryStockProtocol,
+    StockProtocol,
     StockType,
     StockValue,
     OrderItemType
@@ -19,11 +19,11 @@ import {
 
 export class StockTransaction
     <
-    InventoryStock extends InventoryStockProtocol,
+    Stock extends StockProtocol,
     TradeTransaction extends TradeTransactionProtocol
     > {
 
-    public inventoryStocks: InventoryStock[] = []
+    public stocks: Stock[] = []
 
     public commitBlock?: () => TradeTransaction[]
 
@@ -40,13 +40,13 @@ export class StockManager
     Order extends OrderProtocol<OrderItem>,
     OrderItem extends OrderItemProtocol,
     User extends UserProtocol<Order, OrderItem, TradeTransaction>,
-    InventoryStock extends InventoryStockProtocol,
-    SKU extends SKUProtocol<InventoryStock>,
+    Stock extends StockProtocol,
+    SKU extends SKUProtocol<Stock>,
     TradeTransaction extends TradeTransactionProtocol
     > {
 
     private _User: Documentable<User>
-    private _InventoryStock: Documentable<InventoryStock>
+    private _Stock: Documentable<Stock>
     private _SKU: Documentable<SKU>
     private _TradeTransaction: Documentable<TradeTransaction>
 
@@ -54,12 +54,12 @@ export class StockManager
 
     constructor(
         user: Documentable<User>,
-        inventoryStock: Documentable<InventoryStock>,
+        stock: Documentable<Stock>,
         sku: Documentable<SKU>,
         tradeTransaction: Documentable<TradeTransaction>
     ) {
         this._User = user
-        this._InventoryStock = inventoryStock
+        this._Stock = stock
         this._SKU = sku
         this._TradeTransaction = tradeTransaction
     }
@@ -113,28 +113,28 @@ export class StockManager
         if (!stockType) {
             throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] ORDER/${orderID}. SKU: ${skuID}. Invalid StockType.`)
         }
-        const stockTransaction: StockTransaction<InventoryStock, TradeTransaction> = new StockTransaction()
+        const stockTransaction: StockTransaction<Stock, TradeTransaction> = new StockTransaction()
 
         if (stockType === StockType.finite) {
             const numberOfShardsLimit: number = sku.numberOfFetch * quantity
-            const query = await sku.inventoryStocks.collectionReference.where("isAvailabled", "==", true).limit(numberOfShardsLimit).get()
-            const inventoryStocks = query.docs.map((snapshot) => {
-                const stock: InventoryStock = this._InventoryStock.fromSnapshot(snapshot)
+            const query = await sku.stocks.collectionReference.where("isAvailabled", "==", true).limit(numberOfShardsLimit).get()
+            const stocks = query.docs.map((snapshot) => {
+                const stock: Stock = this._Stock.fromSnapshot(snapshot)
                 return stock
             })
-            if (inventoryStocks.length < quantity) {
-                throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is out of stock. stocks count ${inventoryStocks.length}`)
+            if (stocks.length < quantity) {
+                throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} SKU is out of stock. stocks count ${stocks.length}`)
             }
             const tasks = []
-            const stockIDs = inventoryStocks.map(stock => { return stock.id })
+            const stockIDs = stocks.map(stock => { return stock.id })
             for (let i = 0; i < quantity; i++) {
                 const numberOfShards = stockIDs.length
                 if (numberOfShards > 0) {
                     const shardID = Math.floor(Math.random() * numberOfShards)
-                    const inventoryStockID = stockIDs[shardID]
+                    const stockID = stockIDs[shardID]
                     stockIDs.splice(shardID, 1)
                     const task = async () => {
-                        return (await sku.inventoryStocks.doc(inventoryStockID, this._InventoryStock).fetch(transaction)) as InventoryStock
+                        return (await sku.stocks.doc(stockID, this._Stock).fetch(transaction)) as Stock
                     }
                     tasks.push(task())
                 } else {
@@ -142,7 +142,7 @@ export class StockManager
                 }
             }
             const result = await Promise.all(tasks)
-            stockTransaction.inventoryStocks = result
+            stockTransaction.stocks = result
         }
 
         const purchasedBy: string = orderItem.purchasedBy
@@ -162,18 +162,18 @@ export class StockManager
                 tradeTransaction.sku = skuID
                 switch (stockType) {
                     case StockType.finite: {
-                        const inventoryStock = stockTransaction.inventoryStocks[i]
-                        if (inventoryStock.isAvailabled) {
-                            const item = this.delegate.createItem(order, orderItem, inventoryStock.id, transaction)
+                        const stock = stockTransaction.stocks[i]
+                        if (stock.isAvailabled) {
+                            const item = this.delegate.createItem(order, orderItem, stock.id, transaction)
                             tradeTransaction.item = item
-                            tradeTransaction.inventoryStock = inventoryStock.id
-                            transaction.set(inventoryStock.documentReference, {
+                            tradeTransaction.stock = stock.id
+                            transaction.set(stock.documentReference, {
                                 "isAvailabled": false,
                                 "item": item,
                                 "order": orderID
                             }, { merge: true })
                         } else {
-                            throw new TradableError(TradableErrorCode.invalidShard, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} InventoryStock/${inventoryStock.id} InventoryStock is not availabled`)
+                            throw new TradableError(TradableErrorCode.invalidShard, `[StockManager] Invalid order ORDER/${orderID}. SKU/${skuID} Stock/${stock.id} Stock is not availabled`)
                         }
                         break
                     }
@@ -220,12 +220,12 @@ export class StockManager
         }
         const items = result[1].docs
         const stockType = sku.inventory.type
-        const stockTransaction: StockTransaction<InventoryStock, TradeTransaction> = new StockTransaction()
+        const stockTransaction: StockTransaction<Stock, TradeTransaction> = new StockTransaction()
 
         stockTransaction.commitBlock = () => {
             const tradeTransactions: TradeTransaction[] = []
             for (const item of items) {
-                const stockID = item.data()["inventoryStock"]
+                const stockID = item.data()["stock"]
                 const tradeTransaction: TradeTransaction = this._TradeTransaction.init()
                 tradeTransaction.type = TradeTransactionType.orderCancel
                 tradeTransaction.selledBy = selledBy
@@ -234,10 +234,10 @@ export class StockManager
                 tradeTransaction.product = orderItem.product
                 tradeTransaction.sku = skuID
                 tradeTransaction.item = item.ref
-                tradeTransaction.inventoryStock = stockID
+                tradeTransaction.stock = stockID
                 this.delegate.cancelItem(order, orderItem, item.ref, transaction)
                 if (stockType === StockType.finite) {
-                    transaction.set(sku.inventoryStocks.collectionReference.doc(stockID), {
+                    transaction.set(sku.stocks.collectionReference.doc(stockID), {
                         "isAvailabled": true,
                         "item": firebase.firestore.FieldValue.delete(),
                         "order": firebase.firestore.FieldValue.delete()
@@ -262,16 +262,16 @@ export class StockManager
         const seller: User = this._User.init(selledBy)
         const purchaser: User = this._User.init(purchasedBy)
         const sku: SKU = await this._SKU.init(skuID)
-        const inventoryStockQuery = sku.inventoryStocks.collectionReference.where("item", "==", itemRef).limit(1)
-        const snapshot = await transaction.get(inventoryStockQuery)
-        const inventoryStocks = snapshot.docs
+        const stockQuery = sku.stocks.collectionReference.where("item", "==", itemRef).limit(1)
+        const snapshot = await transaction.get(stockQuery)
+        const stocks = snapshot.docs
 
         if (!sku) {
             throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${skuID}`)
         }
 
         const stockType = sku.inventory.type
-        const stockTransaction: StockTransaction<InventoryStock, TradeTransaction> = new StockTransaction()
+        const stockTransaction: StockTransaction<Stock, TradeTransaction> = new StockTransaction()
 
         stockTransaction.commitBlock = () => {
             const tradeTransactions: TradeTransaction[] = []
@@ -285,8 +285,8 @@ export class StockManager
             tradeTransaction.item = itemRef
             this.delegate.cancelItem(order, orderItem, itemRef, transaction)
             if (stockType === StockType.finite) {
-                const stockID = inventoryStocks[0].id
-                transaction.set(sku.inventoryStocks.collectionReference.doc(stockID), {
+                const stockID = stocks[0].id
+                transaction.set(sku.stocks.collectionReference.doc(stockID), {
                     "isAvailabled": true,
                     "item": firebase.firestore.FieldValue.delete(),
                     "order": firebase.firestore.FieldValue.delete()
