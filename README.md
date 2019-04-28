@@ -125,6 +125,22 @@ export interface AccountProtocol<Transaction extends BalanceTransactionProtocol,
 }
 ```
 
+#### Payout
+```
+/version/1/account/:account_id/payoutRequests/:payoutRequest_id
+```
+
+```typescript
+export interface PayoutProtocol extends DocumentType {
+    account: string
+    currency: Currency
+    amount: number
+    status: PayoutStatus
+    transactionResults: TransactionResult[]
+    isCancelled: boolean
+}
+```
+
 #### BalanceTransaction
 ```
 /version/1/account/:account_id/balanceTransactions/:balanceTransaction_id
