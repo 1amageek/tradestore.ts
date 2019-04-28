@@ -162,7 +162,7 @@ export interface BalanceTransactionProtocol extends DocumentType {
 
 ---
 
-Payment Delegate
+#### Payment Delegate
 
 ```typescript
 
