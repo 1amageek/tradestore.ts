@@ -159,3 +159,35 @@ export interface BalanceTransactionProtocol extends DocumentType {
     transactionResults: TransactionResult[]
 }
 ```
+
+---
+
+Payment Delegate
+
+```typescript
+
+export interface PaymentDelegate {
+
+    authorize<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: PaymentOptions): Promise<any>
+
+    authorizeCancel<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: PaymentOptions): Promise<any>
+
+    pay<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: PaymentOptions): Promise<any>
+
+    refund<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: PaymentOptions, reason?: string): Promise<any>
+
+    partRefund<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, orderItem: U, options: PaymentOptions, reason?: string): Promise<any>
+
+    transfer<OrderItem extends OrderItemProtocol, Order extends OrderProtocol<OrderItem>,
+        BalanceTransaction extends BalanceTransactionProtocol,
+        Payout extends PayoutProtocol,
+        Account extends AccountProtocol<BalanceTransaction, Payout>>(currency: Currency, amount: number, order: Order, toAccount: Account, options: TransferOptions): Promise<any>
+
+    transferCancel<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: TransferOptions, reason?: string): Promise<any>
+
+    payout(currency: Currency, amount: number, accountID: string, options: PayoutOptions): Promise<any>
+
+    payoutCancel(currency: Currency, amount: number, accountID: string, options: PayoutOptions): Promise<any>
+
+}
+```
