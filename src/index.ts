@@ -1,5 +1,4 @@
-import * as firebase from 'firebase-admin'
-import { DocumentType, DataRepresentable, Collection, File } from '@1amageek/ballcap-admin'
+import { DocumentType, DataRepresentable, Collection, File, Timestamp, DocumentReference, Transaction, QuerySnapshot } from '@1amageek/ballcap-admin'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
 import { Currency } from './Currency'
 export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult }
@@ -53,10 +52,10 @@ export interface TradeTransactionProtocol extends DocumentType {
     selledBy: string
     purchasedBy: string
     order: string
-    product?: firebase.firestore.DocumentReference
-    sku: string
-    stock?: string
-    item: firebase.firestore.DocumentReference
+    productReference?: DocumentReference
+    skuRefernece: DocumentReference
+    stockReference?: DocumentReference
+    itemReference: DocumentReference
 }
 
 export enum BalanceTransactionType {
@@ -109,9 +108,9 @@ export type Inventory = {
 
 export interface StockProtocol extends DocumentType {
     isAvailabled: boolean
-    SKU: firebase.firestore.DocumentReference
+    skuReference: DocumentReference
     order?: string
-    item?: firebase.firestore.DocumentReference
+    itemReference?: DocumentReference
 }
 
 // SKU
@@ -119,7 +118,7 @@ export interface StockProtocol extends DocumentType {
 export interface SKUProtocol<Stock extends StockProtocol> extends DocumentType {
     selledBy: string
     createdBy: string
-    product?: firebase.firestore.DocumentReference
+    productReference?: DocumentReference
     currency: Currency
     amount: number
     inventory: Inventory
@@ -186,8 +185,8 @@ export interface OrderItemProtocol extends DataRepresentable {
     selledBy: string
     createdBy: string
     type: OrderItemType
-    product?: firebase.firestore.DocumentReference
-    sku?: string
+    productReference?: DocumentReference
+    skuReference?: DocumentReference
     quantity: number
     currency: Currency
     amount: number
@@ -200,9 +199,9 @@ export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends Docu
     selledBy: string
     shippingTo: { [key: string]: string }
     transferredTo: { [key: string]: true }
-    paidAt?: firebase.firestore.Timestamp
-    cancelableDate?: firebase.firestore.Timestamp
-    expirationDate?: firebase.firestore.Timestamp
+    paidAt?: Timestamp
+    cancelableDate?: Timestamp
+    expirationDate?: Timestamp
     currency: Currency
     amount: number
     items: OrderItem[]
@@ -216,9 +215,9 @@ export interface ItemProtocol {
     order: string
     selledBy: string
     purchasedBy: string
-    product?: firebase.firestore.DocumentReference
-    sku: string
-    stock?: string
+    productReference?: DocumentReference
+    skuReference: DocumentReference
+    stockReference?: DocumentReference
     isCancelled: boolean
 }
 
@@ -287,13 +286,13 @@ export type PayoutOptions = {
 
 export interface TradeDelegate {
 
-    reserve<OrderItem extends OrderItemProtocol, Order extends OrderProtocol<OrderItem>>(order: Order, orderItem: OrderItem, transaction: firebase.firestore.Transaction): void
+    reserve<OrderItem extends OrderItemProtocol, Order extends OrderProtocol<OrderItem>>(order: Order, orderItem: OrderItem, transaction: Transaction): void
 
-    createItem<T extends OrderItemProtocol, U extends OrderProtocol<T>>(order: U, orderItem: T, invetoryStock: string | undefined, transaction: firebase.firestore.Transaction): firebase.firestore.DocumentReference
+    createItem<T extends OrderItemProtocol, U extends OrderProtocol<T>>(order: U, orderItem: T, stockReference: DocumentReference | undefined, transaction: Transaction): DocumentReference
 
-    getItems<T extends OrderItemProtocol, U extends OrderProtocol<T>>(order: U, orderItem: T, transaction: firebase.firestore.Transaction): Promise<firebase.firestore.QuerySnapshot>
+    getItems<T extends OrderItemProtocol, U extends OrderProtocol<T>>(order: U, orderItem: T, transaction: Transaction): Promise<QuerySnapshot>
 
-    cancelItem<T extends OrderItemProtocol, U extends OrderProtocol<T>>(order: U, orderItem: T, item: firebase.firestore.DocumentReference, transaction: firebase.firestore.Transaction): void
+    cancelItem<T extends OrderItemProtocol, U extends OrderProtocol<T>>(order: U, orderItem: T, itemReference: DocumentReference, transaction: Transaction): void
 }
 
 export interface PaymentDelegate {

@@ -1,4 +1,4 @@
-import { Doc, Field } from '@1amageek/ballcap-admin'
+import { Doc, Field, DocumentReference } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import { } from "reflect-metadata"
 
@@ -8,8 +8,8 @@ export class OrderItem extends Doc implements tradable.OrderItemProtocol {
     @Field selledBy!: string
     @Field createdBy!: string
     @Field type: tradable.OrderItemType = tradable.OrderItemType.sku
-    @Field product?: FirebaseFirestore.DocumentReference
-    @Field sku?: string
+    @Field productReference?: DocumentReference
+    @Field skuReference?: DocumentReference
     @Field quantity: number = 0
     @Field currency: tradable.Currency = tradable.Currency.USD
     @Field amount: number = 0

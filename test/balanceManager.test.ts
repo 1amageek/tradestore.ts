@@ -1,5 +1,5 @@
 process.env.NODE_ENV = 'test'
-import { initialize, firestore } from '@1amageek/ballcap-admin'
+import { initialize, firestore, Batch } from '@1amageek/ballcap-admin'
 import * as admin from 'firebase-admin'
 import * as Tradable from '../src/index'
 import * as Config from './config'
@@ -30,7 +30,7 @@ describe("BalanceManager", () => {
     const shop: User = new User()
     const user: User = new User()
     const product: Product = new Product()
-    const sku: SKU = new SKU()
+    const sku: SKU = new SKU(product.SKUs.collectionReference.doc())
     const account: Account = new Account(shop.id)
     const order: Order = new Order()
     const date: Date = new Date()
@@ -47,7 +47,7 @@ describe("BalanceManager", () => {
         sku.title = "sku"
         sku.selledBy = shop.id
         sku.createdBy = shop.id
-        sku.product = product.documentReference
+        sku.productReference = product.documentReference
         sku.amount = 100
         sku.currency = Tradable.Currency.JPY
         sku.inventory = {
@@ -63,7 +63,7 @@ describe("BalanceManager", () => {
         orderItem.order = order.id
         orderItem.selledBy = shop.id
         orderItem.purchasedBy = user.id
-        orderItem.sku = sku.id
+        orderItem.skuReference = sku.documentReference
         orderItem.currency = sku.currency
         orderItem.amount = sku.amount
         orderItem.quantity = 1
@@ -75,7 +75,14 @@ describe("BalanceManager", () => {
         order.shippingTo = { address: "address" }
         order.expirationDate = admin.firestore.Timestamp.fromDate(new Date(date.setDate(date.getDate() + 14)))
         order.items.push(orderItem)
-        await Promise.all([order.save(), sku.save(), product.save(), shop.save(), user.save()])
+        const batch: Batch = new Batch()
+        batch.save(user)
+        batch.save(sku)
+        batch.save(product)
+        batch.save(shop)
+        batch.save(sku.stocks, sku.stocks.collectionReference)
+        batch.save(user.orders, user.orders.collectionReference)
+        await batch.commit()
     })
 
     describe("payment", () => {

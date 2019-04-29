@@ -1,4 +1,4 @@
-import { Doc, Field, Collection, SubCollection } from '@1amageek/ballcap-admin'
+import { Doc, Field, Collection, SubCollection, DocumentReference } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import { Stock } from './stock'
 import { } from "reflect-metadata";
@@ -9,7 +9,7 @@ export class SKU extends Doc implements tradable.SKUProtocol<Stock> {
     @Field selledBy!: string
     @Field createdBy!: string
     @Field currency: tradable.Currency = tradable.Currency.JPY
-    @Field product!: FirebaseFirestore.DocumentReference
+    @Field productReference!: DocumentReference
     @Field title!: string
     @Field body!: string
     @Field amount: number = 0

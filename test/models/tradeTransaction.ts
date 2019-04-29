@@ -1,4 +1,4 @@
-import { Doc, Field } from '@1amageek/ballcap-admin'
+import { Doc, Field, DocumentReference } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import { } from "reflect-metadata"
 
@@ -7,8 +7,8 @@ export class TradeTransaction extends Doc implements tradable.TradeTransactionPr
     @Field selledBy: string = ''
     @Field purchasedBy: string = ''
     @Field order: string = ''
-    @Field product?: FirebaseFirestore.DocumentReference
-    @Field sku: string = ''
-    @Field inventoryStock?: string
-    @Field item!: FirebaseFirestore.DocumentReference
+    @Field productReference?: DocumentReference
+    @Field skuRefernece!: DocumentReference
+    @Field stockReference?: DocumentReference
+    @Field itemReference!: DocumentReference
 }

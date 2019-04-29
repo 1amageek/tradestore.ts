@@ -41,7 +41,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@1amageek/ballcap-admin": "^0.2.9",
+    "@1amageek/ballcap-admin": "^0.3.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {

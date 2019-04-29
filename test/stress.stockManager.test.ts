@@ -29,13 +29,13 @@ describe("StockManager", () => {
 	const shop: User = new User()
 	const user: User = new User()
 	const product: Product = new Product()
-	const sku: SKU = new SKU()
+	const sku: SKU = new SKU(product.SKUs.collectionReference.doc())
 	const order: Order = new Order()
 
 
 	let transactionID: string
 
-	const stockManager: StockManager<Order, OrderItem, User, Stock, SKU, TradeTransaction> = new StockManager(User, Stock, SKU, TradeTransaction)
+	const stockManager: StockManager<Order, OrderItem, User, Stock, SKU, TradeTransaction> = new StockManager(User.self(), Stock.self(), SKU.self(), TradeTransaction.self())
 
 	beforeAll(async () => {
 
