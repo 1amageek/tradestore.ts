@@ -41,7 +41,6 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@1amageek/ballcap-admin": "^0.3.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
@@ -50,6 +49,7 @@
     "@types/node": "^11.13.4",
     "@types/stripe": "^6.25.11",
     "firebase-admin": "^7.3.0",
+    "@1amageek/ballcap-admin": "^0.3.0",
     "jest": "^24.7.1",
     "stripe": "^6.30.0",
     "ts-jest": "^24.0.2",
@@ -58,7 +58,8 @@
     "typescript": "^3.4.3"
   },
   "peerDependencies": {
-    "firebase-admin": "^7.2.0"
+    "firebase-admin": "^7.3.0",
+    "@1amageek/ballcap-admin": "^0.3.0"
   },
   "resolutions": {
     "**/gaxios": "1.8.3"
