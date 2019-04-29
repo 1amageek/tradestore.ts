@@ -1,5 +1,5 @@
 process.env.NODE_ENV = 'test'
-import { initialize, firestore } from '@1amageek/ballcap-admin'
+import { initialize, firestore, Batch } from '@1amageek/ballcap-admin'
 import * as admin from 'firebase-admin'
 import * as Tradable from '../src/index'
 import * as Config from './config'
@@ -32,9 +32,6 @@ describe("StockManager", () => {
 	const sku: SKU = new SKU(product.SKUs.collectionReference.doc())
 	const order: Order = new Order()
 
-
-	let transactionID: string
-
 	const stockManager: StockManager<Order, OrderItem, User, Stock, SKU, TradeTransaction> = new StockManager(User.self(), Stock.self(), SKU.self(), TradeTransaction.self())
 
 	beforeAll(async () => {
@@ -46,7 +43,7 @@ describe("StockManager", () => {
 		sku.title = "sku"
 		sku.selledBy = shop.id
 		sku.createdBy = shop.id
-		sku.product = product.documentReference
+		sku.productReference = product.documentReference
 		sku.amount = 100
 		sku.currency = Tradable.Currency.JPY
 		sku.inventory = {
@@ -58,17 +55,25 @@ describe("StockManager", () => {
 			sku.stocks.push(inventoryStock)
 		}
 
-		await Promise.all([user.save(), sku.save(), product.save(), shop.save()])
+		const batch: Batch = new Batch()
+        batch.save(user)
+        batch.save(sku)
+        batch.save(product)
+        batch.save(shop)
+        batch.save(sku.stocks, sku.stocks.collectionReference)
+        batch.save(user.orders, user.orders.collectionReference)
+        await batch.commit()
+
 		stockManager.delegate = new TradeDelegate()
 	})
 
-	describe("Order Stress test", async () => {
+	describe("Order Stress test", () => {
 		test("Success", async () => {
 			let successCount: number = 0
 			const n = 5
 			const interval = 0
 			try {
-				let tasks = []
+				const tasks = []
 				for (let i = 0; i < n; i++) {
 					const test = async () => {
 						const date: Date = new Date()
@@ -77,11 +82,11 @@ describe("StockManager", () => {
 						orderItem.order = order.id
 						orderItem.selledBy = shop.id
 						orderItem.purchasedBy = user.id
-						orderItem.sku = sku.id
+						orderItem.skuReference = sku.documentReference
 						orderItem.currency = sku.currency
 						orderItem.amount = sku.amount
 						orderItem.quantity = 1
-						orderItem.product = product.documentReference
+						orderItem.productReference = product.documentReference
 
 						order.amount = sku.amount
 						order.currency = sku.currency
@@ -97,13 +102,6 @@ describe("StockManager", () => {
 								setTimeout(async () => {
 									try {
 										const result = await firestore.runTransaction(async (transaction) => {
-											const tradeInformation = {
-												selledBy: shop.id,
-												purchasedBy: user.id,
-												order: order.id,
-												sku: sku.id,
-												product: product.documentReference
-											}
 											const stockTransaction = await stockManager._trade(order, orderItem, transaction)
 											return await stockTransaction.commit()
 										})
@@ -123,11 +121,11 @@ describe("StockManager", () => {
 					tasks.push(test())
 				}
 				await Promise.all(tasks)
-				const result = await sku.stocks.query(Stock).where("isAvailabled", "==", false).dataSource().get()
-				expect(successCount).toEqual(result.length)
+				const result = await sku.stocks.collectionReference.where("isAvailabled", "==", false).get()
+				expect(successCount).toEqual(result.docs.length)
 			} catch (error) {
-				const result = await sku.stocks.query(Stock).where("isAvailabled", "==", false).dataSource().get()
-				expect(successCount).toEqual(result.length)
+				const result = await sku.stocks.collectionReference.where("isAvailabled", "==", false).get()
+				expect(successCount).toEqual(result.docs.length)
 				console.log(error)
 			}
 		}, 15000)
