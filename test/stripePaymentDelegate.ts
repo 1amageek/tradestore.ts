@@ -100,7 +100,7 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 
         const stripeCharge = transactionResult["stripe"] as Stripe.charges.ICharge
         const charegeID = stripeCharge.id
-        const idempotency_key = `refund:${orderItem.id}`
+        const idempotency_key = `refund:${orderItem}`
 
         let data: Stripe.refunds.IRefundCreationOptions = {}
         data.amount = amount

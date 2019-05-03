@@ -59,7 +59,6 @@ describe("StockManager", () => {
             sku.stocks.push(inventoryStock)
         }
 
-        orderItem.order = order.id
         orderItem.selledBy = shop.id
         orderItem.purchasedBy = user.id
         orderItem.skuReference = sku.documentReference
@@ -105,10 +104,10 @@ describe("StockManager", () => {
 
                 orderResult = result[0]
 
-                const shopTradeTransaction: TradeTransaction = (await shop.tradeTransactions.collectionReference.where("order", "==", order.id).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
-                const userTradeTransaction: TradeTransaction = (await user.tradeTransactions.collectionReference.where("order", "==", order.id).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
+                const shopTradeTransaction: TradeTransaction = (await shop.tradeTransactions.collectionReference.where("orderReference", "==", order.documentReference).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
+                const userTradeTransaction: TradeTransaction = (await user.tradeTransactions.collectionReference.where("orderReference", "==", order.documentReference).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
                 const _sku = new SKU(sku.documentReference)
-                const stocksDataSource = _sku.stocks.collectionReference.where("order", "==", orderResult.order)
+                const stocksDataSource = _sku.stocks.collectionReference.where("orderReference", "==", orderResult.orderReference)
                 const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get()])
                 const stocks: Stock[] = promiseResult[1].docs.map(value => Stock.fromSnapshot(value))
 
@@ -118,7 +117,7 @@ describe("StockManager", () => {
                 expect(shopTradeTransaction.type).toEqual(Tradable.TradeTransactionType.order)
                 expect(shopTradeTransaction.selledBy).toEqual(shop.id)
                 expect(shopTradeTransaction.purchasedBy).toEqual(user.id)
-                expect(shopTradeTransaction.order).toEqual(order.id)
+                expect(shopTradeTransaction.orderReference).toEqual(order.documentReference)
                 expect(shopTradeTransaction.productReference!.path).toEqual(product.documentReference.path)
                 expect(shopTradeTransaction.skuRefernece.path).toEqual(sku.documentReference.path)
                 expect(shopTradeTransaction.itemReference.path).toEqual(_item.documentReference.path)
@@ -127,7 +126,7 @@ describe("StockManager", () => {
                 expect(userTradeTransaction.type).toEqual(Tradable.TradeTransactionType.order)
                 expect(userTradeTransaction.selledBy).toEqual(shop.id)
                 expect(userTradeTransaction.purchasedBy).toEqual(user.id)
-                expect(userTradeTransaction.order).toEqual(order.id)
+                expect(userTradeTransaction.orderReference).toEqual(order.documentReference)
                 expect(userTradeTransaction.productReference!.path).toEqual(product.documentReference.path)
                 expect(userTradeTransaction.skuRefernece.path).toEqual(sku.documentReference.path)
                 expect(userTradeTransaction.itemReference.path).toEqual(_item.documentReference.path)
@@ -137,7 +136,7 @@ describe("StockManager", () => {
                 expect(stocks.length).toEqual(1)
 
                 // Item
-                expect(_item.order).toEqual(order.id)
+                expect(_item.orderReference.path).toEqual(order.documentReference.path)
                 expect(_item.selledBy).toEqual(shop.id)
                 expect(_item.productReference!.path).toEqual(product.documentReference.path)
                 expect(_item.skuReference.path).toEqual(sku.documentReference.path)
@@ -167,7 +166,7 @@ describe("StockManager", () => {
             expect(shopTradeTransaction.type).toEqual(Tradable.TradeTransactionType.orderCancel)
             expect(shopTradeTransaction.selledBy).toEqual(shop.id)
             expect(shopTradeTransaction.purchasedBy).toEqual(user.id)
-            expect(shopTradeTransaction.order).toEqual(order.id)
+            expect(shopTradeTransaction.orderReference).toEqual(order.documentReference)
             expect(shopTradeTransaction.productReference!.path).toEqual(product.documentReference.path)
             expect(shopTradeTransaction.skuRefernece.path).toEqual(sku.documentReference.path)
             expect(shopTradeTransaction.itemReference.path).toEqual(_item.documentReference.path)
@@ -176,7 +175,7 @@ describe("StockManager", () => {
             expect(userTradeTransaction.type).toEqual(Tradable.TradeTransactionType.orderCancel)
             expect(userTradeTransaction.selledBy).toEqual(shop.id)
             expect(userTradeTransaction.purchasedBy).toEqual(user.id)
-            expect(userTradeTransaction.order).toEqual(order.id)
+            expect(userTradeTransaction.orderReference).toEqual(order.documentReference)
             expect(userTradeTransaction.productReference!.path).toEqual(product.documentReference.path)
             expect(userTradeTransaction.skuRefernece.path).toEqual(sku.documentReference.path)
             expect(userTradeTransaction.itemReference.path).toEqual(_item.documentReference.path)
@@ -186,7 +185,7 @@ describe("StockManager", () => {
             expect(stocks.length).toEqual(5)
 
             // Item
-            expect(_item.order).toEqual(order.id)
+            expect(_item.orderReference.path).toEqual(order.documentReference.path)
             expect(_item.selledBy).toEqual(shop.id)
             expect(_item.productReference!.path).toEqual(product.documentReference.path)
             expect(_item.skuReference.path).toEqual(sku.documentReference.path)

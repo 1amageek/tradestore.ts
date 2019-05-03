@@ -7,7 +7,7 @@ import {
     BalanceTransactionType,
     PayoutProtocol
 } from "./index"
-import { Documentable } from '@1amageek/ballcap-admin'
+import { Documentable, DocumentReference } from '@1amageek/ballcap-admin'
 
 export class BalanceManager
     <
@@ -32,14 +32,14 @@ export class BalanceManager
     static bankAccount: string = "bank_account"
 
     /// Purchaser -> Platform
-    charge(purchasedBy: string, orderID: string, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
+    charge(purchasedBy: string, orderReference: DocumentReference, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
 
         const purchaser: Account = this._Account.init(purchasedBy)
         const balanceTransaction: BalanceTransaction = this._BalanceTransaction.init()
         balanceTransaction.type = BalanceTransactionType.payment
         balanceTransaction.currency = currency
         balanceTransaction.amount = amount
-        balanceTransaction.order = orderID
+        balanceTransaction.orderReference = orderReference
         balanceTransaction.from = purchasedBy
         balanceTransaction.to = BalanceManager.platform
         balanceTransaction.transactionResults.push(transactionResult)
@@ -49,14 +49,14 @@ export class BalanceManager
     }
 
     /// Platform -> Purchaser
-    refund(purchasedBy: string, orderID: string, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
+    refund(purchasedBy: string, orderReference: DocumentReference, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
 
         const purchaser: Account = this._Account.init(purchasedBy)
         const balanceTransaction: BalanceTransaction = this._BalanceTransaction.init()
         balanceTransaction.type = BalanceTransactionType.paymentRefund
         balanceTransaction.currency = currency
         balanceTransaction.amount = amount
-        balanceTransaction.order = orderID
+        balanceTransaction.orderReference = orderReference
         balanceTransaction.from = BalanceManager.platform
         balanceTransaction.to = purchasedBy
         balanceTransaction.transactionResults.push(transactionResult)
@@ -68,7 +68,7 @@ export class BalanceManager
     /// User -> User        from: userID, to: userID
     /// Platform -> User    from: "platform", to: userID   
     /// User -> Platform    from: userID, to: "platform"
-    async transfer(from: string, to: string, orderID: string, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
+    async transfer(from: string, to: string, orderReference: DocumentReference, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
 
         if (from === BalanceManager.platform) {
             const receiver: Account = this._Account.init(to)
@@ -78,7 +78,7 @@ export class BalanceManager
             balanceTransaction.type = BalanceTransactionType.transfer
             balanceTransaction.currency = currency
             balanceTransaction.amount = amount
-            balanceTransaction.order = orderID
+            balanceTransaction.orderReference = orderReference
             balanceTransaction.from = from
             balanceTransaction.to = to
             balanceTransaction.transactionResults.push(transactionResult)
@@ -107,7 +107,7 @@ export class BalanceManager
             balanceTransaction.type = BalanceTransactionType.transfer
             balanceTransaction.currency = currency
             balanceTransaction.amount = amount
-            balanceTransaction.order = orderID
+            balanceTransaction.orderReference = orderReference
             balanceTransaction.from = from
             balanceTransaction.to = to
             balanceTransaction.transactionResults.push(transactionResult)
@@ -137,7 +137,7 @@ export class BalanceManager
             balanceTransaction.type = BalanceTransactionType.transfer
             balanceTransaction.currency = currency
             balanceTransaction.amount = amount
-            balanceTransaction.order = orderID
+            balanceTransaction.orderReference = orderReference
             balanceTransaction.from = from
             balanceTransaction.to = to
             balanceTransaction.transactionResults.push(transactionResult)
@@ -176,7 +176,7 @@ export class BalanceManager
     /// User -> User        from: userID, to: userID
     /// Platform -> User    from: "platform", to: userID   
     /// User -> Platform    from: userID, to: platform
-    async transferRefund(from: string, to: string, orderID: string, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
+    async transferRefund(from: string, to: string, orderReference: DocumentReference, currency: Currency, amount: number, transactionResult: TransactionResult, transaction: firebase.firestore.Transaction) {
 
         if (from === BalanceManager.platform) {
             const receiver: Account = this._Account.init(to)
@@ -186,7 +186,7 @@ export class BalanceManager
             balanceTransaction.type = BalanceTransactionType.transferRefund
             balanceTransaction.currency = currency
             balanceTransaction.amount = amount
-            balanceTransaction.order = orderID
+            balanceTransaction.orderReference = orderReference
             balanceTransaction.from = from
             balanceTransaction.to = to
             balanceTransaction.transactionResults.push(transactionResult)
@@ -215,7 +215,7 @@ export class BalanceManager
             balanceTransaction.type = BalanceTransactionType.transferRefund
             balanceTransaction.currency = currency
             balanceTransaction.amount = amount
-            balanceTransaction.order = orderID
+            balanceTransaction.orderReference = orderReference
             balanceTransaction.from = from
             balanceTransaction.to = to
             balanceTransaction.transactionResults.push(transactionResult)
@@ -245,14 +245,11 @@ export class BalanceManager
             balanceTransaction.type = BalanceTransactionType.transferRefund
             balanceTransaction.currency = currency
             balanceTransaction.amount = amount
-            balanceTransaction.order = orderID
+            balanceTransaction.orderReference = orderReference
             balanceTransaction.from = from
             balanceTransaction.to = to
             balanceTransaction.transactionResults.push(transactionResult)
 
-            transaction.set(balanceTransaction.documentReference,
-                balanceTransaction.data(),
-                { merge: true })
             transaction.set(sender.balanceTransactions.collectionReference.doc(balanceTransaction.id),
                 balanceTransaction.data(),
                 { merge: true })

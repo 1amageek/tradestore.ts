@@ -32,7 +32,7 @@ describe("OrderManager", () => {
     const product: Product = new Product()
     const sku: SKU = new SKU(product.SKUs.collectionReference.doc())
     const account: Account = new Account(shop.id)
-    const order: Order = new Order()
+    const order: Order = new Order(user.orders.collectionReference.doc())
     const date: Date = new Date()
     const orderItem: OrderItem = new OrderItem()
 
@@ -59,7 +59,6 @@ describe("OrderManager", () => {
             sku.stocks.push(shard)
         }
 
-        orderItem.order = order.id
         orderItem.selledBy = shop.id
         orderItem.purchasedBy = user.id
         orderItem.skuReference = sku.documentReference

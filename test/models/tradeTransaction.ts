@@ -6,7 +6,7 @@ export class TradeTransaction extends Doc implements tradable.TradeTransactionPr
     @Field type: tradable.TradeTransactionType = tradable.TradeTransactionType.unknown
     @Field selledBy: string = ''
     @Field purchasedBy: string = ''
-    @Field order: string = ''
+    @Field orderReference!: DocumentReference
     @Field productReference?: DocumentReference
     @Field skuRefernece!: DocumentReference
     @Field stockReference?: DocumentReference

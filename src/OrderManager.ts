@@ -33,10 +33,8 @@ export class OrderManager
         for (const key in updateParams) {
             orderData[key] = updateParams[key]
         }
-        const orderReference = order.documentReference
         const seller = this._User.init(order.selledBy)
         const purchaser = this._User.init(order.purchasedBy)
-        transaction.set(orderReference, orderData, { merge: true })
         transaction.set(seller.receivedOrders.collectionReference.doc(order.id), orderData, { merge: true })
         transaction.set(purchaser.orders.collectionReference.doc(order.id), orderData, { merge: true })
     }

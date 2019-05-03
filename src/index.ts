@@ -51,7 +51,7 @@ export interface TradeTransactionProtocol extends DocumentType {
     type: TradeTransactionType
     selledBy: string
     purchasedBy: string
-    order: string
+    orderReference: DocumentReference
     productReference?: DocumentReference
     skuRefernece: DocumentReference
     stockReference?: DocumentReference
@@ -81,9 +81,9 @@ export interface BalanceTransactionProtocol extends DocumentType {
     amount: number
     from: AccountOrDestination
     to: AccountOrDestination
-    order?: string
-    transfer?: string
-    payout?: string
+    orderReference?: DocumentReference
+    transferReference?: DocumentReference
+    payoutReference?: DocumentReference
     transactionResults: TransactionResult[]
 }
 
@@ -108,7 +108,6 @@ export type Inventory = {
 
 export interface StockProtocol extends DocumentType {
     isAvailabled: boolean
-    skuReference: DocumentReference
     order?: string
     itemReference?: DocumentReference
 }
@@ -180,7 +179,6 @@ export enum OrderPaymentStatus {
 export interface OrderItemProtocol extends DataRepresentable {
     name?: string
     thumbnailImage?: File
-    order: string
     purchasedBy: string
     selledBy: string
     createdBy: string
@@ -198,7 +196,7 @@ export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends Docu
     purchasedBy: string
     selledBy: string
     shippingTo: { [key: string]: string }
-    transferredTo: { [key: string]: true }
+    transferredTo: DocumentReference[]
     paidAt?: Timestamp
     cancelableDate?: Timestamp
     expirationDate?: Timestamp
@@ -212,7 +210,7 @@ export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends Docu
 }
 
 export interface ItemProtocol {
-    order: string
+    orderReference: DocumentReference
     selledBy: string
     purchasedBy: string
     productReference?: DocumentReference
@@ -239,6 +237,28 @@ export interface PayoutProtocol extends DocumentType {
     currency: Currency
     amount: number
     status: PayoutStatus
+    transactionResults: TransactionResult[]
+    isCancelled: boolean
+}
+
+export enum TransferStatus {
+
+    none = 'none',
+
+    requested = 'requested',
+
+    rejected = 'rejected',
+
+    completed = 'completed',
+
+    cancelled = 'cancelled'
+}
+
+export interface TransferProtocol extends DocumentType {
+    account: string
+    currency: Currency
+    amount: number
+    status: TransferStatus
     transactionResults: TransactionResult[]
     isCancelled: boolean
 }
@@ -320,7 +340,7 @@ export interface PaymentDelegate {
 
 }
 
-export enum TradableErrorCode {
+export enum TradestoreErrorCode {
     invalidArgument = 'invalidArgument',
     lessMinimumAmount = 'lessMinimumAmount',
     invalidCurrency = 'invalidCurrency',
@@ -331,13 +351,13 @@ export enum TradableErrorCode {
     internal = 'internal'
 }
 
-export class TradableError implements Error {
+export class TradestoreError implements Error {
     name: string
     message: string
     stack?: string
     info: { [key: string]: any }
 
-    constructor(code: TradableErrorCode, message: string, stack?: string) {
+    constructor(code: TradestoreErrorCode, message: string, stack?: string) {
         this.name = 'tradable.error'
         this.info = {
             code: code,

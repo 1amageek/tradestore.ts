@@ -4,7 +4,6 @@ import {} from "reflect-metadata"
 
 export class Stock extends Doc implements tradable.StockProtocol {
     @Field isAvailabled: boolean = true
-    @Field skuReference!: DocumentReference
     @Field itemReference?: DocumentReference
-    @Field order?: string
+    @Field orderReference?: DocumentReference
 }

@@ -3,7 +3,6 @@ import * as tradable from '../../src/index'
 import { } from "reflect-metadata"
 
 export class OrderItem extends Doc implements tradable.OrderItemProtocol {
-    @Field order: string = ''
     @Field purchasedBy: string = ''
     @Field selledBy!: string
     @Field createdBy!: string

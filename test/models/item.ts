@@ -5,7 +5,7 @@ import { } from "reflect-metadata";
 
 export class Item extends Doc implements tradable.ItemProtocol {
     @Field purchasedBy!: string 
-    @Field order: string = ''
+    @Field orderReference!: DocumentReference
     @Field selledBy: string = ''
     @Field productReference?: DocumentReference
     @Field skuReference!: DocumentReference

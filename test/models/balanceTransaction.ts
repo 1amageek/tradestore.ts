@@ -1,4 +1,4 @@
-import { Doc, Field } from '@1amageek/ballcap-admin'
+import { Doc, Field, DocumentReference } from '@1amageek/ballcap-admin'
 import * as tradable from '../../src/index'
 import {} from "reflect-metadata"
 
@@ -8,8 +8,8 @@ export class BalanceTransaction extends Doc implements tradable.BalanceTransacti
     @Field amount: number = 0
     @Field from: tradable.AccountOrDestination = ""
     @Field to: tradable.AccountOrDestination = ""
-    @Field order?: string | undefined
-    @Field transfer?: string | undefined
-    @Field payout?: string | undefined
+    @Field orderReference?: DocumentReference
+    @Field transferReference?: DocumentReference
+    @Field payoutReference?: DocumentReference
     @Field transactionResults: tradable.TransactionResult[] = []
 }

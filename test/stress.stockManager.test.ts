@@ -79,7 +79,6 @@ describe("StockManager", () => {
 						const date: Date = new Date()
 						const orderItem: OrderItem = new OrderItem()
 
-						orderItem.order = order.id
 						orderItem.selledBy = shop.id
 						orderItem.purchasedBy = user.id
 						orderItem.skuReference = sku.documentReference
@@ -133,5 +132,6 @@ describe("StockManager", () => {
 
 	afterAll(async () => {
 		await Promise.all([shop.delete(), user.delete(), product.delete(), sku.delete()])
+		app.delete()
 	})
 })

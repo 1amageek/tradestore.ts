@@ -7,8 +7,8 @@ import {
     OrderItemProtocol,
     OrderProtocol,
     TradeDelegate,
-    TradableError,
-    TradableErrorCode,
+    TradestoreError,
+    TradestoreErrorCode,
     StockProtocol,
     StockType,
     StockValue,
@@ -63,15 +63,12 @@ export class StockManager
     }
 
     async reserve(order: Order, orderItem: OrderItem, transaction: Transaction) {
-
-        const orderID: string = order.id
         const sku: SKU = await this._SKU.init(orderItem.skuReference).fetch(transaction)
-
         if (!sku.snapshot) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${orderItem.skuReference!.path}`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] Invalid order ${order.documentReference.path}. invalid SKU: ${orderItem.skuReference!.path}`)
         }
         if (!sku.isAvailabled) {
-            throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. ${orderItem.skuReference!.path} SKU is not availabled`)
+            throw new TradestoreError(TradestoreErrorCode.outOfStock, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} SKU is not availabled`)
         }
         this.delegate.reserve(order, orderItem, transaction)
     }
@@ -83,7 +80,7 @@ export class StockManager
             const skuID = orderItem.skuReference
             if (orderItem.type === OrderItemType.sku) {
                 if (!skuID) {
-                    throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${order.id}, This order item is sku required.`)
+                    throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${order.id}, This order item is sku required.`)
                 }
                 const task = this._trade(order, orderItem, transaction)
                 tasks.push(task)
@@ -94,19 +91,18 @@ export class StockManager
 
     async _trade(order: Order, orderItem: OrderItem, transaction: Transaction) {
         const quantity: number = orderItem.quantity
-        const orderID: string = order.id
         const sku: SKU = await this._SKU.init(orderItem.skuReference).fetch(transaction)
 
         if (!sku.snapshot) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${orderItem.skuReference!.path}`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] Invalid order ${order.documentReference.path}. invalid SKU: ${orderItem.skuReference!.path}`)
         }
         if (!sku.isAvailabled) {
-            throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. ${orderItem.skuReference!.path} SKU is not availabled`)
+            throw new TradestoreError(TradestoreErrorCode.outOfStock, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} SKU is not availabled`)
         }
         const stockValue: StockValue | undefined = sku.inventory.value
         const stockType = sku.inventory.type
         if (!stockType) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] ORDER/${orderID}. SKU: ${orderItem.skuReference!.path}. Invalid StockType.`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] ${order.documentReference.path}. SKU: ${orderItem.skuReference!.path}. Invalid StockType.`)
         }
         const stockTransaction: StockTransaction<Stock, TradeTransaction> = new StockTransaction()
 
@@ -118,7 +114,7 @@ export class StockManager
                 return stock
             })
             if (stocks.length < quantity) {
-                throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. ${orderItem.skuReference!.path} SKU is out of stock. stocks count ${stocks.length}`)
+                throw new TradestoreError(TradestoreErrorCode.outOfStock, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} SKU is out of stock. stocks count ${stocks.length}`)
             }
             const tasks = []
             const stockIDs = stocks.map(stock => { return stock.id })
@@ -133,7 +129,7 @@ export class StockManager
                     }
                     tasks.push(task())
                 } else {
-                    throw new TradableError(TradableErrorCode.outOfStock, `[StockManager] Invalid order ORDER/${orderID}. ${orderItem.skuReference!.path} SKU is out of stock`)
+                    throw new TradestoreError(TradestoreErrorCode.outOfStock, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} SKU is out of stock`)
                 }
             }
             const result: Stock[] = await Promise.all(tasks)
@@ -152,7 +148,7 @@ export class StockManager
                 tradeTransaction.type = TradeTransactionType.order
                 tradeTransaction.selledBy = selledBy
                 tradeTransaction.purchasedBy = purchasedBy
-                tradeTransaction.order = order.id
+                tradeTransaction.orderReference = order.documentReference
                 tradeTransaction.productReference = orderItem.productReference
                 tradeTransaction.skuRefernece = sku.documentReference
                 switch (stockType) {
@@ -164,11 +160,11 @@ export class StockManager
                             tradeTransaction.stockReference = stock.documentReference
                             transaction.set(stock.documentReference, {
                                 "isAvailabled": false,
-                                "item": item,
-                                "order": orderID
+                                "itemReference": item,
+                                "orderReference": order.documentReference
                             }, { merge: true })
                         } else {
-                            throw new TradableError(TradableErrorCode.invalidShard, `[StockManager] Invalid order ORDER/${orderID}. ${orderItem.skuReference!.path} Stock/${stock.id} Stock is not availabled`)
+                            throw new TradestoreError(TradestoreErrorCode.invalidShard, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} Stock/${stock.id} Stock is not availabled`)
                         }
                         break
                     }
@@ -179,13 +175,13 @@ export class StockManager
                     }
                     case StockType.bucket: {
                         if (!stockValue) {
-                            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] ORDER/${orderID}. SKU: ${orderItem.skuReference!.path}. Invalid StockValue.`)
+                            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] ${order.documentReference.path}. SKU: ${orderItem.skuReference!.path}. Invalid StockValue.`)
                         }
                         if (stockValue !== StockValue.outOfStock) {
                             const item = this.delegate.createItem(order, orderItem, undefined, transaction)
                             tradeTransaction.itemReference = item
                         } else {
-                            throw new TradableError(TradableErrorCode.invalidShard, `[StockManager] Invalid order ORDER/${orderID}. ${orderItem.skuReference!.path} StockValue is out of stock.`)
+                            throw new TradestoreError(TradestoreErrorCode.invalidShard, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} StockValue is out of stock.`)
                         }
                         break
                     }
@@ -200,7 +196,6 @@ export class StockManager
     }
 
     async cancel(order: Order, orderItem: OrderItem, transaction: Transaction) {
-        const orderID: string = order.id
         const purchasedBy: string = order.purchasedBy
         const selledBy: string = orderItem.selledBy
         const seller: User = this._User.init(selledBy)
@@ -208,7 +203,7 @@ export class StockManager
         const sku: SKU = this._SKU.init(orderItem.skuReference)
         const result = await Promise.all([sku.fetch(transaction), this.delegate.getItems(order, orderItem, transaction)])
         if (!sku) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${orderItem.skuReference!.path}`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] Invalid order ${order.documentReference.path}. invalid SKU: ${orderItem.skuReference!.path}`)
         }
         const items = result[1].docs
         const stockType = sku.inventory.type
@@ -222,7 +217,7 @@ export class StockManager
                 tradeTransaction.type = TradeTransactionType.orderCancel
                 tradeTransaction.selledBy = selledBy
                 tradeTransaction.purchasedBy = purchasedBy
-                tradeTransaction.order = order.id
+                tradeTransaction.orderReference = order.documentReference
                 tradeTransaction.productReference = orderItem.productReference
                 tradeTransaction.skuRefernece = sku.documentReference
                 tradeTransaction.itemReference = item.ref
@@ -231,8 +226,8 @@ export class StockManager
                 if (stockType === StockType.finite) {
                     transaction.set(stockReference, {
                         "isAvailabled": true,
-                        "item": null,
-                        "order": null
+                        "itemReference": null,
+                        "orderReference": null
                     }, { merge: true })
                 }
                 transaction.set(seller.tradeTransactions.collectionReference.doc(tradeTransaction.id), tradeTransaction.data(), { merge: true })
@@ -246,18 +241,17 @@ export class StockManager
 
     async itemCancel(order: Order, orderItem: OrderItem, itemRef: DocumentReference, transaction: Transaction) {
 
-        const orderID: string = order.id
         const purchasedBy: string = order.purchasedBy
         const selledBy: string = order.selledBy
         const seller: User = this._User.init(selledBy)
         const purchaser: User = this._User.init(purchasedBy)
         const sku: SKU = await this._SKU.init(orderItem.skuReference).fetch(transaction)
-        const stockQuery = sku.stocks.collectionReference.where("item", "==", itemRef).limit(1)
+        const stockQuery = sku.stocks.collectionReference.where("itemReference", "==", itemRef).limit(1)
         const snapshot = await transaction.get(stockQuery)
         const stocks = snapshot.docs
 
         if (!sku.snapshot) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[StockManager] Invalid order ORDER/${orderID}. invalid SKU: ${orderItem.skuReference!.path}`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] Invalid order ${order.documentReference.path}. invalid SKU: ${orderItem.skuReference!.path}`)
         }
 
         const stockType = sku.inventory.type
@@ -269,7 +263,7 @@ export class StockManager
             tradeTransaction.type = TradeTransactionType.orderChange
             tradeTransaction.selledBy = selledBy
             tradeTransaction.purchasedBy = purchasedBy
-            tradeTransaction.order = order.id
+            tradeTransaction.orderReference = order.documentReference
             tradeTransaction.productReference = orderItem.productReference
             tradeTransaction.skuRefernece = sku.documentReference
             tradeTransaction.itemReference = itemRef
@@ -277,8 +271,8 @@ export class StockManager
             if (stockType === StockType.finite) {
                 transaction.set(stocks[0].ref, {
                     "isAvailabled": true,
-                    "item": null,
-                    "order": null
+                    "itemReference": null,
+                    "orderReference": null
                 }, { merge: true })
             }
             transaction.set(seller.tradeTransactions.collectionReference.doc(tradeTransaction.id), tradeTransaction.data(), { merge: true })

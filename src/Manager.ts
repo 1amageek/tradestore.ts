@@ -11,8 +11,8 @@ import {
     TradeTransactionProtocol,
     BalanceTransactionProtocol,
     AccountProtocol,
-    TradableErrorCode,
-    TradableError,
+    TradestoreErrorCode,
+    TradestoreError,
     UserProtocol,
     PaymentDelegate,
     TradeDelegate,
@@ -91,7 +91,6 @@ export class Manager
     private _Order: Documentable<Order>
     private _TradeTransaction: Documentable<TradeTransaction>
     private _BalanceTransaction: Documentable<BalanceTransaction>
-    private _Payout: Documentable<Payout>
     private _User: Documentable<User>
     private _Account: Documentable<Account>
 
@@ -113,7 +112,6 @@ export class Manager
         order: Documentable<Order>,
         tradeTransaction: Documentable<TradeTransaction>,
         balanceTransaction: Documentable<BalanceTransaction>,
-        payout: Documentable<Payout>,
         user: Documentable<User>,
         account: Documentable<Account>
     ) {
@@ -122,25 +120,24 @@ export class Manager
         this._Order = order
         this._TradeTransaction = tradeTransaction
         this._BalanceTransaction = balanceTransaction
-        this._Payout = payout
         this._User = user
         this._Account = account
 
         this.stockManager = new StockManager(this._User, this._InventoryStock, this._SKU, this._TradeTransaction)
         this.balanceManager = new BalanceManager(this._BalanceTransaction, this._Account)
         this.orderManager = new OrderManager(this._User)
-        this.payoutManager = new PayoutManager(this._Payout, this._Account)
+        this.payoutManager = new PayoutManager(this._Account)
     }
 
     public async runTransaction(documentReference: DocumentReference, option: any, block: (order: Order, option: any, transaction: Transaction) => Promise<any>) {
 
         const delegate: PaymentDelegate | undefined = this.delegate
         if (!delegate) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ${documentReference.path}, Manager required delegate.`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[Manager] Invalid order ${documentReference.path}, Manager required delegate.`)
         }
         const tradeDelegate: TradeDelegate | undefined = this.tradeDelegate
         if (!tradeDelegate) {
-            throw new TradableError(TradableErrorCode.invalidArgument, `[Manager] Invalid order ${documentReference.path}, Manager required trade delegate.`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[Manager] Invalid order ${documentReference.path}, Manager required trade delegate.`)
         }
         this.stockManager.delegate = tradeDelegate
         try {

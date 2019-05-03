@@ -14,7 +14,7 @@ export class TradeDelegate implements tradable.TradeDelegate {
         const purchaser: User = new User(order.purchasedBy)
         const item: Item = new Item(purchaser.items.collectionReference.doc())
         item.selledBy = orderItem.selledBy
-        item.order = order.id
+        item.orderReference = order.documentReference
         item.productReference = orderItem.productReference
         item.skuReference = orderItem.skuReference!
         item.stockReference = stockReference
@@ -30,7 +30,7 @@ export class TradeDelegate implements tradable.TradeDelegate {
 
     async getItems<T extends tradable.OrderItemProtocol, U extends tradable.OrderProtocol<T>>(order: U, orderItem: T, transaction: Transaction): Promise<QuerySnapshot> {
         const purchaser: User = new User(order.purchasedBy)
-        const query = purchaser.items.collectionReference.where("order", "==", order.id)
+        const query = purchaser.items.collectionReference.where("orderReference", "==", order.documentReference)
         const items = await transaction.get(query)
         return items
     }
