@@ -108,7 +108,7 @@ export type Inventory = {
 
 export interface StockProtocol extends DocumentType {
     isAvailabled: boolean
-    order?: string
+    orderReference?: DocumentReference
     itemReference?: DocumentReference
 }
 
@@ -210,9 +210,9 @@ export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends Docu
 }
 
 export interface ItemProtocol {
-    orderReference: DocumentReference
     selledBy: string
     purchasedBy: string
+    orderReference: DocumentReference
     productReference?: DocumentReference
     skuReference: DocumentReference
     stockReference?: DocumentReference
