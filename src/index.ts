@@ -1,4 +1,4 @@
-import { DocumentType, DataRepresentable, Collection, File, Timestamp, DocumentReference, Transaction, QuerySnapshot } from '@1amageek/ballcap-admin'
+import { DocumentType, DataRepresentable, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot } from '@1amageek/ballcap-admin'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
 import { Currency } from './Currency'
 export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult }

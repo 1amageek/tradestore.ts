@@ -59,7 +59,7 @@
   },
   "peerDependencies": {
     "firebase-admin": "^7.3.0",
-    "@1amageek/ballcap-admin": "^0.3.0"
+    "@1amageek/ballcap-admin": "^0.3.2"
   },
   "resolutions": {
     "**/gaxios": "1.8.3"
