@@ -177,8 +177,6 @@ export enum OrderPaymentStatus {
 }
 
 export interface OrderItemProtocol extends DataRepresentable {
-    name?: string
-    thumbnailImage?: File
     purchasedBy: string
     selledBy: string
     createdBy: string
