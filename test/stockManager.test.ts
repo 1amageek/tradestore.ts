@@ -270,6 +270,7 @@ describe("StockManager", () => {
                 })
             } catch (error) {
                 expect(error).not.toBeUndefined()
+                console.error(error)
                 const _sku = new SKU(sku.documentReference)
                 const stocksDataSource = sku.stocks.collectionReference.where("isAvailabled", "==", true)
                 const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get()])

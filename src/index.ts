@@ -349,18 +349,9 @@ export enum TradestoreErrorCode {
     internal = 'internal'
 }
 
-export class TradestoreError implements Error {
-    name: string
-    message: string
-    stack?: string
-    info: { [key: string]: any }
-
-    constructor(code: TradestoreErrorCode, message: string, stack?: string) {
-        this.name = 'tradable.error'
-        this.info = {
-            code: code,
-        }
-        this.message = message
-        // this.stack = stack || new Error().stack
+export class TradestoreError extends Error {
+    constructor(public code: TradestoreErrorCode, message: string) {
+        super(message);
+        Object.setPrototypeOf(this, TradestoreError.prototype);
     }
 }
