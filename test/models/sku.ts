@@ -16,7 +16,7 @@ export class SKU extends Doc implements tradable.SKUProtocol<Stock> {
     @Field unitSales: number = 0
     @Field inventory: tradable.Inventory = { type: tradable.StockType.finite, quantity: 1 }
     @Field isOutOfStock: boolean = false
-    @Field isAvailabled: boolean = true
+    @Field isAvailable: boolean = true
     @Field numberOfFetch: number = 2
 
     @SubCollection stocks: Collection<Stock> = new Collection()

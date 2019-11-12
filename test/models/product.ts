@@ -7,7 +7,7 @@ export class Product extends Doc {
     @Field caption?: string | undefined;
     @Field selledBy: string = ''
     @Field createdBy: string = ''
-    @Field isAvailabled: boolean = false
+    @Field isAvailable: boolean = false
     @Field isPrivated: boolean = false
 
     @SubCollection SKUs: Collection<SKU> = new Collection()

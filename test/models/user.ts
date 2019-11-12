@@ -9,7 +9,7 @@ import { } from "reflect-metadata";
 
 export class User extends Doc implements tradable.UserProtocol<Order, OrderItem, TradeTransaction> {
 
-    @Field isAvailabled: boolean = false
+    @Field isAvailable: boolean = false
     @Field country: string = "JP"
 
     @SubCollection orders: Collection<Order> = new Collection()

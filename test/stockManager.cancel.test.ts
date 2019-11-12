@@ -157,7 +157,7 @@ describe("StockManager", () => {
             const shopTradeTransaction = (await new TradeTransaction(shop.tradeTransactions.collectionReference.doc(result[0].id)).fetch())
             const userTradeTransaction = (await new TradeTransaction(user.tradeTransactions.collectionReference.doc(result[0].id)).fetch())
             const _sku = new SKU(sku.documentReference)
-            const stocksDataSource = _sku.stocks.collectionReference.where("isAvailabled", "==", true)
+            const stocksDataSource = _sku.stocks.collectionReference.where("isAvailable", "==", true)
             const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get(), shopTradeTransaction.fetch(), userTradeTransaction.fetch()])
             const stocks: Stock[] = promiseResult[1].docs.map(value => Stock.fromSnapshot(value))
             const _item = await new Item(orderResult!.itemReference).fetch()

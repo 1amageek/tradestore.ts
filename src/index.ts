@@ -11,7 +11,7 @@ export interface UserProtocol
     OrderItem extends OrderItemProtocol,
     TradeTransaction extends TradeTransactionProtocol
     > extends DocumentType {
-    isAvailabled: boolean
+    isAvailable: boolean
     country: string
     orders: Collection<Order>
     receivedOrders: Collection<Order>
@@ -107,7 +107,7 @@ export type Inventory = {
 }
 
 export interface StockProtocol extends DocumentType {
-    isAvailabled: boolean
+    isAvailable: boolean
     orderReference?: DocumentReference
     itemReference?: DocumentReference
 }
@@ -121,7 +121,7 @@ export interface SKUProtocol<Stock extends StockProtocol> extends DocumentType {
     currency: Currency
     amount: number
     inventory: Inventory
-    isAvailabled: boolean
+    isAvailable: boolean
 
     /// Maximum number of fetches to acquire at one time
     numberOfFetch: number

@@ -120,10 +120,10 @@ describe("StockManager", () => {
 					tasks.push(test())
 				}
 				await Promise.all(tasks)
-				const result = await sku.stocks.collectionReference.where("isAvailabled", "==", false).get()
+				const result = await sku.stocks.collectionReference.where("isAvailable", "==", false).get()
 				expect(successCount).toEqual(result.docs.length)
 			} catch (error) {
-				const result = await sku.stocks.collectionReference.where("isAvailabled", "==", false).get()
+				const result = await sku.stocks.collectionReference.where("isAvailable", "==", false).get()
 				expect(successCount).toEqual(result.docs.length)
 				console.log(error)
 			}

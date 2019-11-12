@@ -164,7 +164,7 @@ describe("StockManager", () => {
                 const shopTradeTransaction: TradeTransaction = (await shop.tradeTransactions.collectionReference.where("orderReference", "==", order.documentReference).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
                 const userTradeTransaction: TradeTransaction = (await user.tradeTransactions.collectionReference.where("orderReference", "==", order.documentReference).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
                 const _sku = new SKU(sku.documentReference)
-                const stocksDataSource = _sku.stocks.collectionReference.where("isAvailabled", "==", true)
+                const stocksDataSource = _sku.stocks.collectionReference.where("isAvailable", "==", true)
                 const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get()])
                 const stocks: Stock[] = promiseResult[1].docs.map(value => Stock.fromSnapshot(value))
 
@@ -214,7 +214,7 @@ describe("StockManager", () => {
             product.selledBy = shop.id
 
             sku.title = "sku"
-            sku.isAvailabled = false
+            sku.isAvailable = false
             sku.selledBy = shop.id
             sku.createdBy = shop.id
             sku.productReference = product.documentReference
@@ -272,7 +272,7 @@ describe("StockManager", () => {
                 expect(error).not.toBeUndefined()
                 console.error(error)
                 const _sku = new SKU(sku.documentReference)
-                const stocksDataSource = sku.stocks.collectionReference.where("isAvailabled", "==", true)
+                const stocksDataSource = sku.stocks.collectionReference.where("isAvailable", "==", true)
                 const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get()])
                 const stocks: Stock[] = promiseResult[1].docs.map(value => Stock.fromSnapshot(value))
 

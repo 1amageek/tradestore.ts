@@ -67,7 +67,7 @@ export class StockManager
         if (!sku.snapshot) {
             throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] Invalid order ${order.documentReference.path}. invalid SKU: ${orderItem.skuReference!.path}`)
         }
-        if (!sku.isAvailabled) {
+        if (!sku.isAvailable) {
             throw new TradestoreError(TradestoreErrorCode.outOfStock, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} SKU is not availabled`)
         }
         this.delegate.reserve(order, orderItem, transaction)
@@ -96,7 +96,7 @@ export class StockManager
         if (!sku.snapshot) {
             throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[StockManager] Invalid order ${order.documentReference.path}. invalid SKU: ${orderItem.skuReference!.path}`)
         }
-        if (!sku.isAvailabled) {
+        if (!sku.isAvailable) {
             throw new TradestoreError(TradestoreErrorCode.outOfStock, `[StockManager] Invalid order ${order.documentReference.path}. ${orderItem.skuReference!.path} SKU is not availabled`)
         }
         const stockValue: StockValue | undefined = sku.inventory.value
@@ -108,7 +108,7 @@ export class StockManager
 
         if (stockType === StockType.finite) {
             const numberOfShardsLimit: number = sku.numberOfFetch * quantity
-            const query = await sku.stocks.collectionReference.where("isAvailabled", "==", true).limit(numberOfShardsLimit).get()
+            const query = await sku.stocks.collectionReference.where("isAvailable", "==", true).limit(numberOfShardsLimit).get()
             const stocks = query.docs.map((snapshot) => {
                 const stock: Stock = this._Stock.fromSnapshot(snapshot)
                 return stock
@@ -154,12 +154,12 @@ export class StockManager
                 switch (stockType) {
                     case StockType.finite: {
                         const stock = stockTransaction.stocks[i]
-                        if (stock.isAvailabled) {
+                        if (stock.isAvailable) {
                             const item = this.delegate.createItem(order, orderItem, stock.documentReference, transaction)
                             tradeTransaction.itemReference = item
                             tradeTransaction.stockReference = stock.documentReference
                             transaction.set(stock.documentReference, {
-                                "isAvailabled": false,
+                                "isAvailable": false,
                                 "itemReference": item,
                                 "orderReference": order.documentReference
                             }, { merge: true })
@@ -225,7 +225,7 @@ export class StockManager
                 this.delegate.cancelItem(order, orderItem, item.ref, transaction)
                 if (stockType === StockType.finite) {
                     transaction.set(stockReference, {
-                        "isAvailabled": true,
+                        "isAvailable": true,
                         "itemReference": null,
                         "orderReference": null
                     }, { merge: true })
@@ -270,7 +270,7 @@ export class StockManager
             this.delegate.cancelItem(order, orderItem, itemRef, transaction)
             if (stockType === StockType.finite) {
                 transaction.set(stocks[0].ref, {
-                    "isAvailabled": true,
+                    "isAvailable": true,
                     "itemReference": null,
                     "orderReference": null
                 }, { merge: true })
