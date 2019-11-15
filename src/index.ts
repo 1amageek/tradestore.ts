@@ -18,6 +18,22 @@ export interface UserProtocol
     tradeTransactions: Collection<TradeTransaction>
 }
 
+export interface Orderable<Order extends OrderProtocol<OrderItem>, OrderItem extends OrderItemProtocol> extends DocumentType {
+    orders: Collection<Order>
+}
+
+export interface OrderAcceptable<Order extends OrderProtocol<OrderItem>, OrderItem extends OrderItemProtocol> extends DocumentType {
+    receivedOrders: Collection<Order>
+}
+
+export interface Subscribable<Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
+    subscriptions: Collection<Subscription>
+}
+
+export interface Publishable<Subscriber extends Subscribable<Subscription, SubscriptionItem>, Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol>  {
+    subscribers: Collection<Subscriber>
+}
+
 export type Balance = {
 
     pending: { [currency: string]: number }
@@ -128,6 +144,14 @@ export interface SKUProtocol<Stock extends StockProtocol> extends DocumentType {
     stocks: Collection<Stock>
 }
 
+// Discount
+
+export type Discount = {
+    start: Timestamp
+    end: Timestamp
+    subscriptionReference?: DocumentReference
+}
+
 // Order
 
 export enum OrderItemType {
@@ -215,6 +239,130 @@ export interface ItemProtocol {
     skuReference: DocumentReference
     stockReference?: DocumentReference
     isCancelled: boolean
+}
+
+// Subscription
+
+export enum Interval {
+
+    day = 'day',
+
+    week = 'week',
+
+    month = 'month',
+
+    year = 'year'
+}
+
+export enum TiersMode {
+
+    graduated = 'graduated',
+
+    volume = 'volume'
+}
+
+export type Tier = {
+    upTo: number
+    flatAmount?: number
+    unitAmount?: number
+}
+
+export interface PlanProtocol extends DocumentType {
+    selledBy: string
+    createdBy: string
+    productReference?: DocumentReference
+    currency: Currency
+    amount: number
+
+    interval: Interval
+    intervalCount: number
+
+    tiers?: Tier[]
+    tiersMode?: TiersMode
+
+    trialPeriodDays?: Timestamp
+
+    isAvailable: boolean
+}
+
+export type SubscriptionItemBillingThresholds = {
+    usageGte: number
+}
+
+export interface SubscriptionItemProtocol extends DataRepresentable {
+    purchasedBy: string
+    selledBy: string
+    createdBy: string
+    productReference?: DocumentReference
+    planReference: DocumentReference
+    billingThresholds?: SubscriptionItemBillingThresholds 
+    prorate?: boolean
+    prorationDate?: number
+    quantity: number
+    taxRates: number
+}
+
+export enum SubscriptionStatus {
+
+    incomplete = 'incomplete',
+
+    incompleteExpired = 'incomplete_expired',
+
+    trialing = 'trialing',
+
+    active = 'active',
+
+    pastDue = 'past_due',
+
+    canceled = 'canceled',
+
+    unpaid = 'unpaid'
+}
+
+export type SubscriptionBillingThresholds = {
+    amountGte: number
+    resetBillingCycleAnchor: boolean
+}
+
+export enum SubscriptionCollectionMethod {
+
+    chargeAutomatically = 'charge_automatically',
+
+    sendInvoice = 'send_invoice'
+}
+
+export type InvoiceCustomerBalanceSettings = {
+    consumeAppliedBalanceOnVoid: boolean
+}
+
+export type Period = {
+    start: Timestamp
+    end: Timestamp
+}
+
+export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
+    purchasedBy: string
+    selledBy: string
+    applicationFeePercent: number
+    billingCycleAnchor: Timestamp
+    billingThresholds: SubscriptionBillingThresholds
+    cancelAtPeriodEnd: boolean
+    canceledAt?: Timestamp
+    collectionMethod: SubscriptionCollectionMethod
+    currentPeriod?: Period
+    daysUntilDue?: number
+    defaultPaymentMethod?: string
+    defaultSource?: string
+    defaultTaxRates?: number
+    discountReference?: DocumentReference
+    startDate?: Timestamp
+    endedAt?: Timestamp
+    invoiceCustomerBalanceSettings: InvoiceCustomerBalanceSettings
+    items: SubscriptionItem[]
+    latestInvoice?: string
+    pendingInvoiceItemInterval?: Interval
+    status: SubscriptionStatus
+    trial?: Period
 }
 
 export enum PayoutStatus {
