@@ -1,4 +1,4 @@
-import { DocumentType, DataRepresentable, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot } from '@1amageek/ballcap-admin'
+import { DocumentType, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot, FieldValue, ModelType } from '@1amageek/ballcap-admin'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
 import { Currency } from './Currency'
 export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult }
@@ -18,19 +18,42 @@ export interface UserProtocol
     tradeTransactions: Collection<TradeTransaction>
 }
 
-export interface Orderable<Order extends OrderProtocol<OrderItem>, OrderItem extends OrderItemProtocol> extends DocumentType {
-    orders: Collection<Order>
+export interface Tradable<
+    Order extends OrderProtocol<OrderItem>,
+    OrderItem extends OrderItemProtocol,
+    TradeTransaction extends TradeTransactionProtocol,
+    Subscription extends SubscriptionProtocol<SubscriptionItem>,
+    SubscriptionItem extends SubscriptionItemProtocol> 
+    extends Orderable<Order, OrderItem, TradeTransaction>, OrderAcceptable<Order, OrderItem, TradeTransaction>, Subscribable<Subscription, SubscriptionItem> {
 }
 
-export interface OrderAcceptable<Order extends OrderProtocol<OrderItem>, OrderItem extends OrderItemProtocol> extends DocumentType {
+export interface Orderable
+    <
+    Order extends OrderProtocol<OrderItem>,
+    OrderItem extends OrderItemProtocol,
+    TradeTransaction extends TradeTransactionProtocol
+    >
+    extends DocumentType {
+    orders: Collection<Order>
+    tradeTransactions: Collection<TradeTransaction>
+}
+
+export interface OrderAcceptable
+    <
+    Order extends OrderProtocol<OrderItem>,
+    OrderItem extends OrderItemProtocol,
+    TradeTransaction extends TradeTransactionProtocol
+    >
+    extends DocumentType {
     receivedOrders: Collection<Order>
+    tradeTransactions: Collection<TradeTransaction>
 }
 
 export interface Subscribable<Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
     subscriptions: Collection<Subscription>
 }
 
-export interface Publishable<Subscriber extends Subscribable<Subscription, SubscriptionItem>, Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol>  {
+export interface Publishable<Subscriber extends Subscribable<Subscription, SubscriptionItem>, Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
     subscribers: Collection<Subscriber>
 }
 
@@ -200,7 +223,7 @@ export enum OrderPaymentStatus {
     cancelFailure = 'cancel_failure'
 }
 
-export interface OrderItemProtocol extends DataRepresentable {
+export interface OrderItemProtocol extends ModelType {
     purchasedBy: string
     selledBy: string
     createdBy: string
@@ -267,39 +290,22 @@ export type Tier = {
     unitAmount?: number
 }
 
-export interface PlanProtocol extends DocumentType {
-    selledBy: string
+export interface PlanProtocol<Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol> extends Subscribable<Subscription, SubscriptionItem> {
+    publishedBy: string
     createdBy: string
     productReference?: DocumentReference
     currency: Currency
     amount: number
-
     interval: Interval
     intervalCount: number
-
     tiers?: Tier[]
     tiersMode?: TiersMode
-
     trialPeriodDays?: Timestamp
-
     isAvailable: boolean
 }
 
 export type SubscriptionItemBillingThresholds = {
     usageGte: number
-}
-
-export interface SubscriptionItemProtocol extends DataRepresentable {
-    purchasedBy: string
-    selledBy: string
-    createdBy: string
-    productReference?: DocumentReference
-    planReference: DocumentReference
-    billingThresholds?: SubscriptionItemBillingThresholds 
-    prorate?: boolean
-    prorationDate?: number
-    quantity: number
-    taxRates: number
 }
 
 export enum SubscriptionStatus {
@@ -340,12 +346,26 @@ export type Period = {
     end: Timestamp
 }
 
+export interface SubscriptionItemProtocol extends ModelType {
+    subscribedBy: string
+    publishedBy: string
+    createdBy: string
+    productReference?: DocumentReference
+    planReference: DocumentReference
+    billingThresholds?: SubscriptionItemBillingThresholds
+    prorate?: boolean
+    prorationDate?: number
+    quantity: number
+    taxRates: number
+}
+
 export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
-    purchasedBy: string
-    selledBy: string
+    subscribedBy: string
+    publishedBy: string
+    createdBy: string
     applicationFeePercent: number
-    billingCycleAnchor: Timestamp
-    billingThresholds: SubscriptionBillingThresholds
+    billingCycleAnchor: Timestamp | FieldValue
+    billingThresholds?: SubscriptionBillingThresholds
     cancelAtPeriodEnd: boolean
     canceledAt?: Timestamp
     collectionMethod: SubscriptionCollectionMethod
@@ -363,6 +383,7 @@ export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemP
     pendingInvoiceItemInterval?: Interval
     status: SubscriptionStatus
     trial?: Period
+    transactionResults: TransactionResult[]
 }
 
 export enum PayoutStatus {
@@ -435,6 +456,12 @@ export type PaymentOptions = {
     metadata?: any
 }
 
+export type SubscriptionOptions = {
+    customer: string
+    vendorType: string
+    metadata?: any
+}
+
 export enum RefundReason {
     duplicate = 'duplicate',
     fraudulent = 'fraudulent',
@@ -472,6 +499,8 @@ export interface PaymentDelegate {
     refund<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: PaymentOptions, reason?: string): Promise<any>
 
     partRefund<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, orderItem: U, options: PaymentOptions, reason?: string): Promise<any>
+
+    subscribe<U extends SubscriptionItemProtocol, T extends SubscriptionProtocol<U>>(subscription: T, options: PaymentOptions): Promise<any>
 
     transfer<OrderItem extends OrderItemProtocol, Order extends OrderProtocol<OrderItem>,
         BalanceTransaction extends BalanceTransactionProtocol,

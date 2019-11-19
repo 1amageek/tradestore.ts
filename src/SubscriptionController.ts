@@ -1,70 +1,90 @@
-import { firestore, DocumentReference, Transaction, Documentable } from '@1amageek/ballcap-admin'
-import { StockManager } from './StockManager'
-import { BalanceManager } from './BalanceManager'
-import { OrderManager } from './OrderManager'
-import { PayoutManager } from './PayoutManager'
+import { firestore, Transaction, Documentable, Modelable } from '@1amageek/ballcap-admin'
+// import { StockManager } from './StockManager'
+// import { BalanceManager } from './BalanceManager'
+// import { OrderManager } from './OrderManager'
+// import { PayoutManager } from './PayoutManager'
 
 import {
-	PlanProtocol,
-	SubscriptionItemProtocol,
-	SubscriptionProtocol,
-	Subscribable
+    SubscriptionOptions,
+    PlanProtocol,
+    SubscriptionItemProtocol,
+    SubscriptionProtocol,
+    Subscribable,
+    Publishable,
+    PaymentDelegate,
+    TradestoreErrorCode,
+    TradestoreError
 } from "./index"
 
 export class SubscriptionController
     <
-    Plan extends PlanProtocol,
+    Plan extends PlanProtocol<Subscription, SubscriptionItem>,
     SubscriptionItem extends SubscriptionItemProtocol,
-	Subscription extends SubscriptionProtocol<SubscriptionItem>,
-	Subscriber extends Subscribable<Subscription, SubscriptionItem>
+    Subscription extends SubscriptionProtocol<SubscriptionItem>,
+    Subscriber extends Subscribable<Subscription, SubscriptionItem>,
+    Publisher extends Publishable<Subscriber, Subscription, SubscriptionItem>
     > {
 
-    private _Plan: Documentable<Plan>
+
     private _Subscription: Documentable<Subscription>
-    private _Subscriber: Documentable<Subscriber>
+    private _SubscriptionItem: Modelable<SubscriptionItem>
 
-    // public stockManager: StockManager<Order, OrderItem, User, InventoryStock, SKU, TradeTransaction>
-
-    // public balanceManager: BalanceManager<BalanceTransaction, Payout, Account>
-
-    // public orderManager: OrderManager<Order, OrderItem, User, TradeTransaction>
-
-    // public payoutManager: PayoutManager<BalanceTransaction, Payout, Account>
-
-    // public delegate?: PaymentDelegate
-
-    // public tradeDelegate?: TradeDelegate
+    public delegate?: PaymentDelegate
 
     constructor(
-		plan: Documentable<Plan>,
-		subscription: Documentable<Subscription>,
-		subscriber: Documentable<Subscriber>
+        subscription: Documentable<Subscription>,
+        subscriptionItem: Modelable<SubscriptionItem>,
     ) {
-        this._Plan = plan
         this._Subscription = subscription
-        this._Subscriber = subscriber
-	}
+        this._SubscriptionItem = subscriptionItem
+    }
 
-	public async subscribe(plans: Plan[]) {
-		const subscription: Subscription = this._Subscription.init()
-	}
-
-	public async runTransaction(documentReference: DocumentReference, option: any, block: (order: Order, option: any, transaction: Transaction) => Promise<any>) {
+    public async subscribe(subscriber: Subscriber, plans: Plan[], option: Partial<SubscriptionOptions>, block: (subscription: Subscription, option: any, transaction: Transaction) => Promise<Subscription>) {
 
         const delegate: PaymentDelegate | undefined = this.delegate
         if (!delegate) {
-            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[Manager] Invalid order ${documentReference.path}, Manager required delegate.`)
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid subscribe. Manager required delegate. Plans: [${plans.map(plan => plan.id)}]`)
         }
-        const tradeDelegate: TradeDelegate | undefined = this.tradeDelegate
-        if (!tradeDelegate) {
-            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[Manager] Invalid order ${documentReference.path}, Manager required trade delegate.`)
+
+        const publisherIDs: string[] = plans.reduce<string[]>((prev, current) => {
+            if (!prev.includes(current.publishedBy)) {
+                prev.push(current.publishedBy)
+            }
+            return prev
+        }, [])
+
+        if (publisherIDs.length === 0) {
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid subscribe. There are no publishers to subscribe to. Plans: [${plans.map(plan => plan.id)}]`)
         }
-        this.stockManager.delegate = tradeDelegate
+
+        if (publisherIDs.length > 1) {
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid subscribe. You can subscribe to plans from the same publisher at the same time. Plans: [${plans.map(plan => plan.id)}]`)
+        }
+
+        const publishedBy: string = publisherIDs[0]
+        const subscription: Subscription = this._Subscription.init()
+        subscription.subscribedBy = subscriber.id
+        subscription.publishedBy = publishedBy
+        subscription.createdBy = subscriber.id
+        plans.forEach(plan => {
+            const subscriptionItem: SubscriptionItem = (subscription.items.find(item => item.planReference.path === plan.documentReference.path) || this._SubscriptionItem.init()) as SubscriptionItem
+            subscriptionItem.subscribedBy = subscriber.id
+            subscriptionItem.publishedBy = plan.publishedBy
+            subscriptionItem.createdBy = subscriber.id
+            subscriptionItem.planReference = plan.documentReference
+            subscriptionItem.productReference = plan.productReference
+            subscriptionItem.quantity += 1
+            subscription.items.push(subscriptionItem)
+        })
+
         try {
             return await firestore.runTransaction(async (transaction) => {
-                const orderSnapshot = await transaction.get(documentReference)
-                const order: Order = this._Order.fromSnapshot(orderSnapshot)
-                return await block(order, option, transaction)
+                const subscriptionResult = await block(subscription, option, transaction)
+                transaction.set(subscriber.subscriptions.collectionReference.doc(subscriptionResult.id), subscriptionResult.data())
+                plans.forEach(plan => {
+                    transaction.set(plan.subscriptions.collectionReference.doc(subscriptionResult.id), subscriptionResult.data())
+                })
+                return subscriptionResult
             })
         } catch (error) {
             throw error

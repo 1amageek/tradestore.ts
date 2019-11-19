@@ -116,12 +116,12 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
             throw error
         }
     }
-    async transfer<OrderItem extends tradable.OrderItemProtocol, 
-    Order extends tradable.OrderProtocol<OrderItem>, 
-    BalanceTransaction extends tradable.BalanceTransactionProtocol, 
-    Payout extends tradable.PayoutProtocol, 
-    Account extends tradable.AccountProtocol<BalanceTransaction, Payout>>
-    (currency: tradable.Currency, amount: number, order: Order, toAccount: Account, options: tradable.TransferOptions) {
+    async transfer<OrderItem extends tradable.OrderItemProtocol,
+        Order extends tradable.OrderProtocol<OrderItem>,
+        BalanceTransaction extends tradable.BalanceTransactionProtocol,
+        Payout extends tradable.PayoutProtocol,
+        Account extends tradable.AccountProtocol<BalanceTransaction, Payout>>
+        (currency: tradable.Currency, amount: number, order: Order, toAccount: Account, options: tradable.TransferOptions) {
         const idempotency_key = order.id
         const destination = toAccount.accountInformation['stripe']['id']
         const data: Stripe.transfers.ITransferCreationOptions = {
@@ -152,6 +152,30 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 
     async payoutCancel(currency: tradable.Currency, amount: number, accountID: string, options: tradable.PayoutOptions) {
         throw new Error("Method not implemented.");
+    }
+
+    async subscribe<U extends tradable.SubscriptionItemProtocol, T extends tradable.SubscriptionProtocol<U>>(subscription: T, options: tradable.PaymentOptions): Promise<any> {
+        if (!options.customer) {
+            throw new Error("")
+        }
+        const customer: string = options.customer
+
+        const data: Stripe.subscriptions.ISubscriptionCreationOptions = {
+            customer: customer,
+            trial_from_plan: true
+        }
+
+        data.items = subscription.items.map(item => {
+            return {
+                plan: item.planReference.id,
+                quantity: item.quantity
+            }
+        })
+
+        if (options.metadata) {
+            data.metadata = options.metadata
+        }
+        return await stripe.subscriptions.create(data)
     }
 
 
