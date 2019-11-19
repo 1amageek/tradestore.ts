@@ -330,13 +330,6 @@ export type SubscriptionBillingThresholds = {
     resetBillingCycleAnchor: boolean
 }
 
-export enum SubscriptionCollectionMethod {
-
-    chargeAutomatically = 'charge_automatically',
-
-    sendInvoice = 'send_invoice'
-}
-
 export type InvoiceCustomerBalanceSettings = {
     consumeAppliedBalanceOnVoid: boolean
 }
@@ -359,21 +352,31 @@ export interface SubscriptionItemProtocol extends ModelType {
     taxRates: number
 }
 
+export type SubscriptionResult = {
+    [key: string]: any
+}
+
+export enum SubscriptionBilling {
+    chargeAutomatically = 'charge_automatically',
+    sendInvoice = 'send_invoice'
+}
+
 export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
     subscribedBy: string
     publishedBy: string
     createdBy: string
-    applicationFeePercent: number
+    applicationFeePercent?: number
+    billing: SubscriptionBilling
     billingCycleAnchor: Timestamp | FieldValue
     billingThresholds?: SubscriptionBillingThresholds
     cancelAtPeriodEnd: boolean
     canceledAt?: Timestamp
-    collectionMethod: SubscriptionCollectionMethod
+    collectionMethod: SubscriptionBilling
     currentPeriod?: Period
     daysUntilDue?: number
     defaultPaymentMethod?: string
     defaultSource?: string
-    defaultTaxRates?: number
+    defaultTaxRates: any[]
     discountReference?: DocumentReference
     startDate?: Timestamp
     endedAt?: Timestamp
@@ -383,7 +386,7 @@ export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemP
     pendingInvoiceItemInterval?: Interval
     status: SubscriptionStatus
     trial?: Period
-    transactionResults: TransactionResult[]
+    result?: SubscriptionResult
 }
 
 export enum PayoutStatus {

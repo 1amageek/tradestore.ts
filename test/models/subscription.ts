@@ -1,5 +1,5 @@
 import { Doc, Model, Field, FieldValue, Timestamp, DocumentReference } from '@1amageek/ballcap-admin'
-import { SubscriptionProtocol, SubscriptionItemProtocol, SubscriptionItemBillingThresholds, SubscriptionBillingThresholds, SubscriptionCollectionMethod, Period, InvoiceCustomerBalanceSettings, Interval, SubscriptionStatus, TransactionResult } from '../../src'
+import { SubscriptionProtocol, SubscriptionItemProtocol, SubscriptionItemBillingThresholds, SubscriptionBillingThresholds, Period, InvoiceCustomerBalanceSettings, Interval, SubscriptionStatus, SubscriptionBilling, SubscriptionResult } from '../../src'
 import { } from "reflect-metadata";
 
 export class SubscriptionItem extends Model implements SubscriptionItemProtocol {
@@ -19,17 +19,18 @@ export class Subscription extends Doc implements SubscriptionProtocol<Subscripti
 	@Field subscribedBy!: string	
 	@Field publishedBy!: string
 	@Field createdBy!: string
-	@Field applicationFeePercent: number = 0
+	@Field applicationFeePercent?: number
+	@Field billing!: SubscriptionBilling
 	@Field billingCycleAnchor: Timestamp | FieldValue = FieldValue.serverTimestamp()
 	@Field billingThresholds?: SubscriptionBillingThresholds
 	@Field cancelAtPeriodEnd: boolean = false
 	@Field canceledAt?: Timestamp
-	@Field collectionMethod: SubscriptionCollectionMethod = SubscriptionCollectionMethod.chargeAutomatically
+	@Field collectionMethod: SubscriptionBilling = SubscriptionBilling.chargeAutomatically
 	@Field currentPeriod?: Period
 	@Field daysUntilDue?: number
 	@Field defaultPaymentMethod?: string
 	@Field defaultSource?: string
-	@Field defaultTaxRates?: number
+	@Field defaultTaxRates: any[] = []
 	@Field discountReference?: DocumentReference
 	@Field startDate?: Timestamp
 	@Field endedAt?: Timestamp
@@ -39,5 +40,5 @@ export class Subscription extends Doc implements SubscriptionProtocol<Subscripti
 	@Field pendingInvoiceItemInterval?: Interval
 	@Field status: SubscriptionStatus = SubscriptionStatus.incomplete
 	@Field trial?: Period
-	@Field transactionResults: TransactionResult[] = []
+	@Field result?: SubscriptionResult
 }

@@ -46,6 +46,36 @@ export class SubscriptionController
             throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid subscribe. Manager required delegate. Plans: [${plans.map(plan => plan.id)}]`)
         }
 
+        const intervals: string[] = plans.reduce<string[]>((prev, current) => {
+            if (!prev.includes(current.interval)) {
+                prev.push(current.interval)
+            }
+            return prev
+        }, [])
+
+        if (intervals.length === 0) {
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid plans. interval fields must match across all plans on this subscription. Plans: [${plans.map(plan => plan.id)}]`)
+        }
+
+        if (intervals.length > 1) {
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid plans. interval fields must match across all plans on this subscription. Plans: [${plans.map(plan => plan.id)}]`)
+        }
+
+        const intervalCounts: number[] = plans.reduce<number[]>((prev, current) => {
+            if (!prev.includes(current.intervalCount)) {
+                prev.push(current.intervalCount)
+            }
+            return prev
+        }, [])
+
+        if (intervalCounts.length === 0) {
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid plans. interval fields must match across all plans on this subscription. Plans: [${plans.map(plan => plan.id)}]`)
+        }
+
+        if (intervalCounts.length > 1) {
+            throw new TradestoreError(TradestoreErrorCode.invalidArgument, `[SubscriptionController] Invalid plans. interval fields must match across all plans on this subscription. Plans: [${plans.map(plan => plan.id)}]`)
+        }
+
         const publisherIDs: string[] = plans.reduce<string[]>((prev, current) => {
             if (!prev.includes(current.publishedBy)) {
                 prev.push(current.publishedBy)
