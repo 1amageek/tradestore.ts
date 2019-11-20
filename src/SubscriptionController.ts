@@ -101,6 +101,8 @@ export class SubscriptionController
             subscriptionItem.planReference = plan.documentReference
             subscriptionItem.productReference = plan.productReference
             subscriptionItem.quantity += 1
+            subscriptionItem.amount = plan.amount
+            subscriptionItem.currency = plan.currency
             subscription.items.push(subscriptionItem)
         })
 
