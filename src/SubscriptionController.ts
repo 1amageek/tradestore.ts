@@ -1,4 +1,4 @@
-import { firestore, Transaction, Documentable, Modelable } from '@1amageek/ballcap-admin'
+import { firestore, Transaction, Documentable, Modelable, FieldValue } from '@1amageek/ballcap-admin'
 // import { StockManager } from './StockManager'
 // import { BalanceManager } from './BalanceManager'
 // import { OrderManager } from './OrderManager'
@@ -6,6 +6,7 @@ import { firestore, Transaction, Documentable, Modelable } from '@1amageek/ballc
 
 import {
     SubscriptionOptions,
+    SubscriptionStatus,
     PlanProtocol,
     SubscriptionItemProtocol,
     SubscriptionProtocol,
@@ -96,6 +97,8 @@ export class SubscriptionController
         subscription.subscribedBy = subscriber.id
         subscription.publishedBy = publishedBy
         subscription.createdBy = subscriber.id
+        subscription.startAt = FieldValue.serverTimestamp()
+        subscription.status = SubscriptionStatus.active
         plans.forEach(plan => {
             const subscriptionItem: SubscriptionItem = (subscription.items.find(item => item.planReference.path === plan.documentReference.path) || this._SubscriptionItem.init()) as SubscriptionItem
             subscriptionItem.subscribedBy = subscriber.id

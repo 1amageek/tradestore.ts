@@ -1,5 +1,5 @@
 import { Doc, Model, Field, FieldValue, Timestamp, DocumentReference } from '@1amageek/ballcap-admin'
-import { SubscriptionProtocol, SubscriptionItemProtocol, SubscriptionItemBillingThresholds, SubscriptionBillingThresholds, Period, InvoiceCustomerBalanceSettings, Interval, SubscriptionStatus, SubscriptionBilling, SubscriptionResult } from '../../src'
+import { ShardType, DafaultShardCharacters, randomShard, SubscriptionProtocol, SubscriptionItemProtocol, Period, Interval, SubscriptionStatus, SubscriptionResult, Currency } from '../../src'
 import { } from "reflect-metadata";
 
 export class SubscriptionItem extends Model implements SubscriptionItemProtocol {
@@ -8,36 +8,24 @@ export class SubscriptionItem extends Model implements SubscriptionItemProtocol 
 	@Field createdBy!: string
 	@Field productReference?: DocumentReference
 	@Field planReference!: DocumentReference
-	@Field billingThresholds?: SubscriptionItemBillingThresholds
-	@Field prorate?: boolean
-	@Field prorationDate?: number
 	@Field quantity: number = 0
 	@Field taxRates: number = 0
+	@Field amount: number = 0
+	@Field currency: Currency = Currency.JPY
 }
 
 export class Subscription extends Doc implements SubscriptionProtocol<SubscriptionItem> {
-	@Field subscribedBy!: string	
+	@Field shard: ShardType = randomShard(DafaultShardCharacters)
+	@Field subscribedBy!: string
 	@Field publishedBy!: string
 	@Field createdBy!: string
-	@Field applicationFeePercent?: number
-	@Field billing!: SubscriptionBilling
-	@Field billingCycleAnchor: Timestamp | FieldValue = FieldValue.serverTimestamp()
-	@Field billingThresholds?: SubscriptionBillingThresholds
+	@Field interval: Interval = Interval.month
+	@Field intervalCount: number = 1
+	@Field startAt: Timestamp | FieldValue = FieldValue.serverTimestamp()
+	@Field canceledAt?: Timestamp | FieldValue;
 	@Field cancelAtPeriodEnd: boolean = false
-	@Field canceledAt?: Timestamp
-	@Field collectionMethod: SubscriptionBilling = SubscriptionBilling.chargeAutomatically
-	@Field currentPeriod?: Period
-	@Field daysUntilDue?: number
-	@Field defaultPaymentMethod?: string
-	@Field defaultSource?: string
-	@Field defaultTaxRates: any[] = []
-	@Field discountReference?: DocumentReference
-	@Field startDate?: Timestamp
-	@Field endedAt?: Timestamp
-	@Field invoiceCustomerBalanceSettings: InvoiceCustomerBalanceSettings = { consumeAppliedBalanceOnVoid: true }
+	@Field endedAt?: Timestamp | FieldValue;
 	@Field items: SubscriptionItem[] = []
-	@Field latestInvoice?: string
-	@Field pendingInvoiceItemInterval?: Interval
 	@Field status: SubscriptionStatus = SubscriptionStatus.incomplete
 	@Field trial?: Period
 	@Field result?: SubscriptionResult

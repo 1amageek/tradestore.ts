@@ -3,6 +3,28 @@ import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutC
 import { Currency } from './Currency'
 export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult }
 
+export type ShardType =
+    "a" | "b" | "c" | "d" | "e" |
+    "f" | "g" | "h" | "i" | "j" |
+    "k" | "l" | "m" | "n" | "o" |
+    "p" | "q" | "r" | "s" | "t" |
+    "u" | "v" | "w" | "x" | "y" |
+    "z"
+
+export const ShardCharacters: ShardType[] = [
+    "a", "b", "c", "d", "e",
+    "f", "g", "h", "i", "j",
+    "k", "l", "m", "n", "o",
+    "p", "q", "r", "s", "t",
+    "u", "v", "w", "x", "y",
+    "z"
+]
+
+export const DafaultShardCharacters: ShardType[] = ShardCharacters.slice(0, 10)
+
+export const randomShard = (seed: ShardType[]): ShardType => {
+    return seed[Math.floor(Math.random() * Math.floor(seed.length))]
+}
 
 /// UserProtocol is a protocol that the user must retain to make it tradeable.
 export interface UserProtocol
@@ -23,7 +45,7 @@ export interface Tradable<
     OrderItem extends OrderItemProtocol,
     TradeTransaction extends TradeTransactionProtocol,
     Subscription extends SubscriptionProtocol<SubscriptionItem>,
-    SubscriptionItem extends SubscriptionItemProtocol> 
+    SubscriptionItem extends SubscriptionItemProtocol>
     extends Orderable<Order, OrderItem, TradeTransaction>, OrderAcceptable<Order, OrderItem, TradeTransaction>, Subscribable<Subscription, SubscriptionItem> {
 }
 
@@ -87,6 +109,8 @@ export enum TradeTransactionType {
 }
 
 export interface TradeTransactionProtocol extends DocumentType {
+    // Properties to improve scale performance
+    shard: ShardType
     type: TradeTransactionType
     selledBy: string
     purchasedBy: string
@@ -115,6 +139,8 @@ export type AccountOrDestination = string | "platform" | "bank_account"
 
 /// Transaction is the history that changed Balance. Tranasaction is made from the ID of the event.
 export interface BalanceTransactionProtocol extends DocumentType {
+    // Properties to improve scale performance
+    shard: ShardType
     type: BalanceTransactionType
     currency: Currency
     amount: number
@@ -304,10 +330,6 @@ export interface PlanProtocol<Subscription extends SubscriptionProtocol<Subscrip
     isAvailable: boolean
 }
 
-export type SubscriptionItemBillingThresholds = {
-    usageGte: number
-}
-
 export enum SubscriptionStatus {
 
     incomplete = 'incomplete',
@@ -325,15 +347,6 @@ export enum SubscriptionStatus {
     unpaid = 'unpaid'
 }
 
-export type SubscriptionBillingThresholds = {
-    amountGte: number
-    resetBillingCycleAnchor: boolean
-}
-
-export type InvoiceCustomerBalanceSettings = {
-    consumeAppliedBalanceOnVoid: boolean
-}
-
 export type Period = {
     start: Timestamp
     end: Timestamp
@@ -345,11 +358,10 @@ export interface SubscriptionItemProtocol extends ModelType {
     createdBy: string
     productReference?: DocumentReference
     planReference: DocumentReference
-    billingThresholds?: SubscriptionItemBillingThresholds
-    prorate?: boolean
-    prorationDate?: number
     quantity: number
     taxRates: number
+    amount: number
+    currency: Currency
 }
 
 export type SubscriptionResult = {
@@ -362,31 +374,32 @@ export enum SubscriptionBilling {
 }
 
 export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
+
+    // Properties to improve scale performance
+    shard: ShardType
+
     subscribedBy: string
     publishedBy: string
     createdBy: string
-    applicationFeePercent?: number
-    billing: SubscriptionBilling
-    billingCycleAnchor: Timestamp | FieldValue
-    billingThresholds?: SubscriptionBillingThresholds
-    cancelAtPeriodEnd: boolean
-    canceledAt?: Timestamp
-    collectionMethod: SubscriptionBilling
-    currentPeriod?: Period
-    daysUntilDue?: number
-    defaultPaymentMethod?: string
-    defaultSource?: string
-    defaultTaxRates: any[]
-    discountReference?: DocumentReference
-    startDate?: Timestamp
-    endedAt?: Timestamp
-    invoiceCustomerBalanceSettings: InvoiceCustomerBalanceSettings
     items: SubscriptionItem[]
-    latestInvoice?: string
-    pendingInvoiceItemInterval?: Interval
     status: SubscriptionStatus
+    interval: Interval
+    intervalCount: number
+
+    // The timestamp that started the subscription 
+    startAt: Timestamp | FieldValue
+
+    // Unsubscribed timestamp
+    canceledAt?: Timestamp | FieldValue
+
+    // You can use this attribute to determine whether a subscription that has a status of active is scheduled to be canceled at the end of the current period .
+    cancelAtPeriodEnd: boolean
+
+    // If the subscription has ended, the date the subscription ended.
+    endedAt?: Timestamp | FieldValue
+
+    // Trial period
     trial?: Period
-    result?: SubscriptionResult
 }
 
 export enum PayoutStatus {
@@ -425,6 +438,8 @@ export enum TransferStatus {
 }
 
 export interface TransferProtocol extends DocumentType {
+    // Properties to improve scale performance
+    shard: ShardType
     account: string
     currency: Currency
     amount: number

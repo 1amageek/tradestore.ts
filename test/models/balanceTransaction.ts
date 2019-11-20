@@ -1,15 +1,16 @@
 import { Doc, Field, DocumentReference } from '@1amageek/ballcap-admin'
-import * as tradable from '../../src/index'
+import {BalanceTransactionProtocol, ShardType, randomShard, DafaultShardCharacters, BalanceTransactionType, Currency, AccountOrDestination, TransactionResult } from '../../src/index'
 import {} from "reflect-metadata"
 
-export class BalanceTransaction extends Doc implements tradable.BalanceTransactionProtocol {
-    @Field type: tradable.BalanceTransactionType = tradable.BalanceTransactionType.payment
-    @Field currency: tradable.Currency = tradable.Currency.USD
+export class BalanceTransaction extends Doc implements BalanceTransactionProtocol {
+    @Field shard: ShardType = randomShard(DafaultShardCharacters)
+    @Field type: BalanceTransactionType = BalanceTransactionType.payment
+    @Field currency: Currency = Currency.USD
     @Field amount: number = 0
-    @Field from: tradable.AccountOrDestination = ""
-    @Field to: tradable.AccountOrDestination = ""
+    @Field from: AccountOrDestination = ""
+    @Field to: AccountOrDestination = ""
     @Field orderReference?: DocumentReference
     @Field transferReference?: DocumentReference
     @Field payoutReference?: DocumentReference
-    @Field transactionResults: tradable.TransactionResult[] = []
+    @Field transactionResults: TransactionResult[] = []
 }
