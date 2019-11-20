@@ -518,7 +518,7 @@ export interface PaymentDelegate {
 
     partRefund<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, orderItem: U, options: PaymentOptions, reason?: string): Promise<any>
 
-    subscribe<U extends SubscriptionItemProtocol, T extends SubscriptionProtocol<U>>(subscription: T, options: PaymentOptions): Promise<any>
+    subscribe<U extends SubscriptionItemProtocol, T extends SubscriptionProtocol<U>>(subscription: T, options: SubscriptionOptions): Promise<any>
 
     transfer<OrderItem extends OrderItemProtocol, Order extends OrderProtocol<OrderItem>,
         BalanceTransaction extends BalanceTransactionProtocol,

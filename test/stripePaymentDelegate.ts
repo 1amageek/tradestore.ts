@@ -154,7 +154,7 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
         throw new Error("Method not implemented.");
     }
 
-    async subscribe<U extends tradable.SubscriptionItemProtocol, T extends tradable.SubscriptionProtocol<U>>(subscription: T, options: tradable.PaymentOptions): Promise<any> {
+    async subscribe<U extends tradable.SubscriptionItemProtocol, T extends tradable.SubscriptionProtocol<U>>(subscription: T, options: tradable.SubscriptionOptions): Promise<any> {
         if (!options.customer) {
             throw new Error("")
         }
