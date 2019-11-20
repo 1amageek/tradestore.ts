@@ -1,7 +1,8 @@
 import { DocumentType, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot, FieldValue, ModelType } from '@1amageek/ballcap-admin'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
+import { SubscriptionController } from './SubscriptionController'
 import { Currency } from './Currency'
-export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult }
+export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult, SubscriptionController }
 
 export type ShardType =
     "a" | "b" | "c" | "d" | "e" |

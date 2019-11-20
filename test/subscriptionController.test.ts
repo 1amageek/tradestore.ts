@@ -36,7 +36,7 @@ describe("SubscriptionController", () => {
 	plan1.intervalCount = 1
 	plan1.productReference = product.documentReference
 
-	const controller: SubscriptionController<Plan, SubscriptionItem, Subscription, User, User> = new SubscriptionController(Subscription.self(), SubscriptionItem.model())
+	const controller: SubscriptionController<Plan, SubscriptionItem, Subscription, User> = new SubscriptionController(Subscription.self(), SubscriptionItem.model())
 	controller.delegate = new StripePaymentDelegate()
 
 	beforeAll(async () => {

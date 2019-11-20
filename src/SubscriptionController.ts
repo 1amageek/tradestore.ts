@@ -1,8 +1,4 @@
 import { firestore, Transaction, Documentable, Modelable, FieldValue } from '@1amageek/ballcap-admin'
-// import { StockManager } from './StockManager'
-// import { BalanceManager } from './BalanceManager'
-// import { OrderManager } from './OrderManager'
-// import { PayoutManager } from './PayoutManager'
 
 import {
     SubscriptionOptions,
@@ -11,7 +7,6 @@ import {
     SubscriptionItemProtocol,
     SubscriptionProtocol,
     Subscribable,
-    Publishable,
     PaymentDelegate,
     TradestoreErrorCode,
     TradestoreError
@@ -22,8 +17,7 @@ export class SubscriptionController
     Plan extends PlanProtocol<Subscription, SubscriptionItem>,
     SubscriptionItem extends SubscriptionItemProtocol,
     Subscription extends SubscriptionProtocol<SubscriptionItem>,
-    Subscriber extends Subscribable<Subscription, SubscriptionItem>,
-    Publisher extends Publishable<Subscriber, Subscription, SubscriptionItem>
+    Subscriber extends Subscribable<Subscription, SubscriptionItem>
     > {
 
 
