@@ -1,9 +1,10 @@
 import { Doc, Field, Timestamp, File, DocumentReference } from '@1amageek/ballcap-admin'
-import * as tradable from '../../src/index'
+import { OrderProtocol, ShardType, randomShard, DafaultShardCharacters, Currency, OrderPaymentStatus, OrderTransferStatus, TransactionResult } from '../../src/index'
 import { OrderItem } from './orderItem'
 import { } from "reflect-metadata"
 
-export class Order extends Doc implements tradable.OrderProtocol<OrderItem> {
+export class Order extends Doc implements OrderProtocol<OrderItem> {
+    @Field shard: ShardType = randomShard(DafaultShardCharacters)
     @Field title?: string
     @Field assets: File[] = []
     @Field cancelableDate?: Timestamp
@@ -14,11 +15,11 @@ export class Order extends Doc implements tradable.OrderProtocol<OrderItem> {
     @Field transferredTo: DocumentReference[] = []
     @Field paidAt?: Timestamp
     @Field expirationDate?: Timestamp
-    @Field currency: tradable.Currency = tradable.Currency.JPY
+    @Field currency: Currency = Currency.JPY
     @Field amount: number = 0
     @Field items: OrderItem[] = []
-    @Field paymentStatus: tradable.OrderPaymentStatus = tradable.OrderPaymentStatus.none
-    @Field transferStatus: tradable.OrderTransferStatus = tradable.OrderTransferStatus.none
-    @Field transactionResults: tradable.TransactionResult[] = []
+    @Field paymentStatus: OrderPaymentStatus = OrderPaymentStatus.none
+    @Field transferStatus: OrderTransferStatus = OrderTransferStatus.none
+    @Field transactionResults: TransactionResult[] = []
     @Field isCancelled: boolean = false
 }

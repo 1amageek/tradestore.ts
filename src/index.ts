@@ -251,6 +251,8 @@ export interface OrderItemProtocol extends ModelType {
 }
 
 export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends DocumentType {
+    // Properties to improve scale performance
+    shard: ShardType
     parentID?: string
     purchasedBy: string
     selledBy: string
