@@ -219,34 +219,21 @@ export enum OrderItemStatus {
 }
 
 export enum OrderTransferStatus {
-
     none = 'none',
-
     rejected = 'rejected',
-
     transferred = 'transferred',
-
     cancelled = 'cancelled',
-
     transferFailure = 'failure',
-
     cancelFailure = 'cancel_failure'
 }
 
 export enum OrderPaymentStatus {
-
     none = 'none',
-
     rejected = 'rejected',
-
     authorized = 'authorized',
-
     paid = 'paid',
-
     cancelled = 'cancelled',
-
     paymentFailure = 'failure',
-
     cancelFailure = 'cancel_failure'
 }
 
@@ -294,20 +281,14 @@ export interface ItemProtocol {
 // Subscription
 
 export enum Interval {
-
     day = 'day',
-
     week = 'week',
-
     month = 'month',
-
     year = 'year'
 }
 
 export enum TiersMode {
-
     graduated = 'graduated',
-
     volume = 'volume'
 }
 
@@ -332,19 +313,12 @@ export interface PlanProtocol<Subscription extends SubscriptionProtocol<Subscrip
 }
 
 export enum SubscriptionStatus {
-
     incomplete = 'incomplete',
-
     incompleteExpired = 'incomplete_expired',
-
     trialing = 'trialing',
-
     active = 'active',
-
     pastDue = 'past_due',
-
     canceled = 'canceled',
-
     unpaid = 'unpaid'
 }
 
@@ -404,15 +378,10 @@ export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemP
 }
 
 export enum PayoutStatus {
-
     none = 'none',
-
     requested = 'requested',
-
     rejected = 'rejected',
-
     completed = 'completed',
-
     cancelled = 'cancelled'
 }
 
@@ -426,15 +395,10 @@ export interface PayoutProtocol extends DocumentType {
 }
 
 export enum TransferStatus {
-
     none = 'none',
-
     requested = 'requested',
-
     rejected = 'rejected',
-
     completed = 'completed',
-
     cancelled = 'cancelled'
 }
 
