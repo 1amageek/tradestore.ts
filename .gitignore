@@ -9,6 +9,7 @@ firestore-debug.log*
 
 lib/
 */**/secret.json
+test/config.ts
 
 # Firebase cache
 .firebase/
