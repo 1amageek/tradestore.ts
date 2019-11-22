@@ -1,8 +1,31 @@
-import { DocumentType, DataRepresentable, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot } from '@1amageek/ballcap-admin'
+import { DocumentType, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot, FieldValue, ModelType } from '@1amageek/ballcap-admin'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
+import { SubscriptionController } from './SubscriptionController'
 import { Currency } from './Currency'
-export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult }
+export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult, SubscriptionController }
 
+export type ShardType =
+    "a" | "b" | "c" | "d" | "e" |
+    "f" | "g" | "h" | "i" | "j" |
+    "k" | "l" | "m" | "n" | "o" |
+    "p" | "q" | "r" | "s" | "t" |
+    "u" | "v" | "w" | "x" | "y" |
+    "z"
+
+export const ShardCharacters: ShardType[] = [
+    "a", "b", "c", "d", "e",
+    "f", "g", "h", "i", "j",
+    "k", "l", "m", "n", "o",
+    "p", "q", "r", "s", "t",
+    "u", "v", "w", "x", "y",
+    "z"
+]
+
+export const DafaultShardCharacters: ShardType[] = ShardCharacters.slice(0, 10)
+
+export const randomShard = (seed: ShardType[]): ShardType => {
+    return seed[Math.floor(Math.random() * Math.floor(seed.length))]
+}
 
 /// UserProtocol is a protocol that the user must retain to make it tradeable.
 export interface UserProtocol
@@ -16,6 +39,45 @@ export interface UserProtocol
     orders: Collection<Order>
     receivedOrders: Collection<Order>
     tradeTransactions: Collection<TradeTransaction>
+}
+
+export interface Tradable<
+    Order extends OrderProtocol<OrderItem>,
+    OrderItem extends OrderItemProtocol,
+    TradeTransaction extends TradeTransactionProtocol,
+    Subscription extends SubscriptionProtocol<SubscriptionItem>,
+    SubscriptionItem extends SubscriptionItemProtocol>
+    extends Orderable<Order, OrderItem, TradeTransaction>, OrderAcceptable<Order, OrderItem, TradeTransaction>, Subscribable<Subscription, SubscriptionItem> {
+}
+
+export interface Orderable
+    <
+    Order extends OrderProtocol<OrderItem>,
+    OrderItem extends OrderItemProtocol,
+    TradeTransaction extends TradeTransactionProtocol
+    >
+    extends DocumentType {
+    orders: Collection<Order>
+    tradeTransactions: Collection<TradeTransaction>
+}
+
+export interface OrderAcceptable
+    <
+    Order extends OrderProtocol<OrderItem>,
+    OrderItem extends OrderItemProtocol,
+    TradeTransaction extends TradeTransactionProtocol
+    >
+    extends DocumentType {
+    receivedOrders: Collection<Order>
+    tradeTransactions: Collection<TradeTransaction>
+}
+
+export interface Subscribable<Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
+    subscriptions: Collection<Subscription>
+}
+
+export interface Publishable<Subscriber extends Subscribable<Subscription, SubscriptionItem>, Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
+    subscribers: Collection<Subscriber>
 }
 
 export type Balance = {
@@ -48,6 +110,8 @@ export enum TradeTransactionType {
 }
 
 export interface TradeTransactionProtocol extends DocumentType {
+    // Properties to improve scale performance
+    shard: ShardType
     type: TradeTransactionType
     selledBy: string
     purchasedBy: string
@@ -76,6 +140,8 @@ export type AccountOrDestination = string | "platform" | "bank_account"
 
 /// Transaction is the history that changed Balance. Tranasaction is made from the ID of the event.
 export interface BalanceTransactionProtocol extends DocumentType {
+    // Properties to improve scale performance
+    shard: ShardType
     type: BalanceTransactionType
     currency: Currency
     amount: number
@@ -128,6 +194,14 @@ export interface SKUProtocol<Stock extends StockProtocol> extends DocumentType {
     stocks: Collection<Stock>
 }
 
+// Discount
+
+export type Discount = {
+    start: Timestamp
+    end: Timestamp
+    subscriptionReference?: DocumentReference
+}
+
 // Order
 
 export enum OrderItemType {
@@ -176,7 +250,7 @@ export enum OrderPaymentStatus {
     cancelFailure = 'cancel_failure'
 }
 
-export interface OrderItemProtocol extends DataRepresentable {
+export interface OrderItemProtocol extends ModelType {
     purchasedBy: string
     selledBy: string
     createdBy: string
@@ -217,6 +291,118 @@ export interface ItemProtocol {
     isCancelled: boolean
 }
 
+// Subscription
+
+export enum Interval {
+
+    day = 'day',
+
+    week = 'week',
+
+    month = 'month',
+
+    year = 'year'
+}
+
+export enum TiersMode {
+
+    graduated = 'graduated',
+
+    volume = 'volume'
+}
+
+export type Tier = {
+    upTo: number
+    flatAmount?: number
+    unitAmount?: number
+}
+
+export interface PlanProtocol<Subscription extends SubscriptionProtocol<SubscriptionItem>, SubscriptionItem extends SubscriptionItemProtocol> extends Subscribable<Subscription, SubscriptionItem> {
+    publishedBy: string
+    createdBy: string
+    productReference?: DocumentReference
+    currency: Currency
+    amount: number
+    interval: Interval
+    intervalCount: number
+    tiers?: Tier[]
+    tiersMode?: TiersMode
+    trialPeriodDays?: Timestamp
+    isAvailable: boolean
+}
+
+export enum SubscriptionStatus {
+
+    incomplete = 'incomplete',
+
+    incompleteExpired = 'incomplete_expired',
+
+    trialing = 'trialing',
+
+    active = 'active',
+
+    pastDue = 'past_due',
+
+    canceled = 'canceled',
+
+    unpaid = 'unpaid'
+}
+
+export type Period = {
+    start: Timestamp
+    end: Timestamp
+}
+
+export interface SubscriptionItemProtocol extends ModelType {
+    subscribedBy: string
+    publishedBy: string
+    createdBy: string
+    productReference?: DocumentReference
+    planReference: DocumentReference
+    quantity: number
+    taxRates: number
+    amount: number
+    currency: Currency
+}
+
+export type SubscriptionResult = {
+    [key: string]: any
+}
+
+export enum SubscriptionBilling {
+    chargeAutomatically = 'charge_automatically',
+    sendInvoice = 'send_invoice'
+}
+
+export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemProtocol> extends DocumentType {
+
+    // Properties to improve scale performance
+    shard: ShardType
+
+    subscribedBy: string
+    publishedBy: string
+    createdBy: string
+    items: SubscriptionItem[]
+    status: SubscriptionStatus
+    interval: Interval
+    intervalCount: number
+
+    // The timestamp that started the subscription 
+    startAt: Timestamp | FieldValue
+
+    // Unsubscribed timestamp
+    canceledAt?: Timestamp | FieldValue
+
+    // You can use this attribute to determine whether a subscription that has a status of active is scheduled to be canceled at the end of the current period .
+    cancelAtPeriodEnd: boolean
+
+    // If the subscription has ended, the date the subscription ended.
+    endedAt?: Timestamp | FieldValue
+
+    // Trial period
+    trial?: Period
+}
+
 export enum PayoutStatus {
 
     none = 'none',
@@ -253,6 +439,8 @@ export enum TransferStatus {
 }
 
 export interface TransferProtocol extends DocumentType {
+    // Properties to improve scale performance
+    shard: ShardType
     account: string
     currency: Currency
     amount: number
@@ -284,6 +472,12 @@ export type PaymentOptions = {
     numberOfShards?: number
     refundFeeRate: number   // 0 ~ 1 
     reason?: RefundReason
+    metadata?: any
+}
+
+export type SubscriptionOptions = {
+    customer: string
+    vendorType: string
     metadata?: any
 }
 
@@ -324,6 +518,8 @@ export interface PaymentDelegate {
     refund<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, options: PaymentOptions, reason?: string): Promise<any>
 
     partRefund<U extends OrderItemProtocol, T extends OrderProtocol<U>>(currency: Currency, amount: number, order: T, orderItem: U, options: PaymentOptions, reason?: string): Promise<any>
+
+    subscribe<U extends SubscriptionItemProtocol, T extends SubscriptionProtocol<U>>(subscription: T, options: SubscriptionOptions): Promise<any>
 
     transfer<OrderItem extends OrderItemProtocol, Order extends OrderProtocol<OrderItem>,
         BalanceTransaction extends BalanceTransactionProtocol,
