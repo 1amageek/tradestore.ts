@@ -1,4 +1,4 @@
-import { DocumentType, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot, FieldValue, ModelType } from '@1amageek/ballcap-admin'
+import { DocumentType, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot, ModelType } from '@1amageek/ballcap-admin'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
 import { SubscriptionController } from './SubscriptionController'
 import { Currency } from './Currency'
@@ -364,16 +364,16 @@ export interface SubscriptionProtocol<SubscriptionItem extends SubscriptionItemP
     intervalCount: number
 
     // The timestamp that started the subscription 
-    startAt: Timestamp | FieldValue
+    startAt: Timestamp
 
     // Unsubscribed timestamp
-    canceledAt?: Timestamp | FieldValue
+    canceledAt?: Timestamp
 
     // You can use this attribute to determine whether a subscription that has a status of active is scheduled to be canceled at the end of the current period .
     cancelAtPeriodEnd: boolean
 
     // If the subscription has ended, the date the subscription ended.
-    endedAt?: Timestamp | FieldValue
+    endedAt?: Timestamp
 
     // Trial period
     trial?: Period

@@ -44,11 +44,11 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-    "@1amageek/ballcap-admin": "^0.5.2",
+    "@1amageek/ballcap-admin": "^0.5.5",
     "@types/jest": "^24.0.11",
     "@types/node": "^11.13.4",
     "@types/stripe": "^6.25.11",
-    "firebase-admin": "^8.7.0",
+    "firebase-admin": "^8.8.0",
     "gaxios": "1.8.3",
     "jest": "^24.7.1",
     "stripe": "^6.30.0",
@@ -57,7 +57,7 @@
     "typescript": "^3.7.2"
   },
   "peerDependencies": {
-    "@1amageek/ballcap-admin": "^0.5.1",
-    "firebase-admin": "^8.7.0"
+    "@1amageek/ballcap-admin": "^0.5.5",
+    "firebase-admin": "^8.8.0"
   }
 }
