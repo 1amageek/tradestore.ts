@@ -1,0 +1,40 @@
+{
+	"private": false,
+	"name": "@1amageek/tradestore-type",
+	"publishConfig": {
+		"access": "public"
+	},
+	"version": "0.2.5",
+	"description": "Cloud Firestore model framework for TypeScript - Google",
+	"contributors": [
+		{
+			"name": "Norikazu Muramoto",
+			"email": "tmy0x3@icloud.com"
+		}
+	],
+	"scripts": {
+    "build": "../node_modules/.bin/tsc -d",
+    "prepare": "npm run build"
+  },
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/1amageek/tradestore.ts.git"
+	},
+	"keywords": [
+		"firestore",
+		"firebase",
+		"tradestore",
+		"model",
+		"typescript"
+	],
+	"author": "1amageek",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/1amageek/tradestore.ts/issues"
+	},
+	"main": "lib/commonType.js",
+	"types": "lib/commonType.d.ts",
+	"dependencies": {},
+	"devDependencies": {},
+	"peerDependencies": {}
+}
