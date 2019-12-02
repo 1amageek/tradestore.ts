@@ -291,7 +291,6 @@ export type PaymentOptions = {
 }
 
 export type SubscriptionOptions = {
-	source?: string,
 	customer: string,
 	vendorType: string
 	metadata?: any
