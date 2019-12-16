@@ -93,11 +93,12 @@ export class SubscriptionController
 		subscription.createdBy = subscriber.id
 		subscription.startAt = FieldValue.serverTimestamp()
 		subscription.status = SubscriptionStatus.active
+		const subscriberSubscriptionsReference = subscriber.subscriptions.collectionReference.doc(subscription.id)
 		if (option.metadata) {
-			option.metadata["subscription_id"] = subscription.id
+			option.metadata["subscription_path"] = subscriberSubscriptionsReference.path
 		} else {
 			option.metadata = {
-				subscription_id: subscription.id
+				subscription_path: subscriberSubscriptionsReference.path
 			}
 		}
 		plans.forEach(plan => {
@@ -115,7 +116,7 @@ export class SubscriptionController
 		try {
 			return await firestore.runTransaction(async (transaction) => {
 				const subscriptionResult = await block(subscription, option, transaction)
-				transaction.set(subscriber.subscriptions.collectionReference.doc(subscriptionResult.id), subscriptionResult.data())
+				transaction.set(subscriberSubscriptionsReference, subscriptionResult.data())
 				plans.forEach(plan => {
 					transaction.set(plan.subscriptions.collectionReference.doc(subscriptionResult.id), subscriptionResult.data())
 				})
