@@ -101,7 +101,7 @@ describe("StockManager", () => {
 
                 const shopTradeTransaction: TradeTransaction = (await shop.tradeTransactions.collectionReference.where("orderReference", "==", order.documentReference).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
                 const userTradeTransaction: TradeTransaction = (await user.tradeTransactions.collectionReference.where("orderReference", "==", order.documentReference).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
-                
+
                 const _sku = new SKU(sku.documentReference)
                 const stocksDataSource = _sku.stocks.collectionReference.where("orderReference", "==", orderResult.orderReference)
                 const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get()])
@@ -132,10 +132,10 @@ describe("StockManager", () => {
                 expect(stocks.length).toEqual(1)
 
                 // Item
-                expect(_item.orderReference.path).toEqual(order.documentReference.path)
+                expect(_item.orderReference!.path).toEqual(order.documentReference.path)
                 expect(_item.selledBy).toEqual(shop.id)
                 expect(_item.productReference!.path).toEqual(product.documentReference.path)
-                expect(_item.skuReference.path).toEqual(sku.documentReference.path)
+                expect(_item.skuReference!.path).toEqual(sku.documentReference.path)
 
             } catch (error) {
                 console.log("******", error)
@@ -194,10 +194,10 @@ describe("StockManager", () => {
                 expect(stocks.length).toEqual(1)
 
                 // Item
-                expect(_item.orderReference.path).toEqual(order.documentReference.path)
+                expect(_item.orderReference!.path).toEqual(order.documentReference.path)
                 expect(_item.selledBy).toEqual(shop.id)
                 expect(_item.productReference!.path).toEqual(product.documentReference.path)
-                expect(_item.skuReference.path).toEqual(sku.documentReference.path)
+                expect(_item.skuReference!.path).toEqual(sku.documentReference.path)
             }
         }, 15000)
 

@@ -165,9 +165,11 @@ export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends Docu
 export interface ItemProtocol {
 	selledBy: string
 	purchasedBy: string
-	orderReference: DocumentReference
+	orderReference?: DocumentReference
+	subscriptionReference?: DocumentReference
 	productReference?: DocumentReference
-	skuReference: DocumentReference
+	skuReference?: DocumentReference
+	planReference?: DocumentReference
 	stockReference?: DocumentReference
 	isCancelled: boolean
 }

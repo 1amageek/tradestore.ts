@@ -136,10 +136,10 @@ describe("StockManager", () => {
                 expect(stocks.length).toEqual(1)
 
                 // Item
-                expect(_item.orderReference.path).toEqual(order.documentReference.path)
+                expect(_item.orderReference!.path).toEqual(order.documentReference.path)
                 expect(_item.selledBy).toEqual(shop.id)
                 expect(_item.productReference!.path).toEqual(product.documentReference.path)
-                expect(_item.skuReference.path).toEqual(sku.documentReference.path)
+                expect(_item.skuReference!.path).toEqual(sku.documentReference.path)
 
             } catch (error) {
                 expect(error).not.toBeUndefined()
@@ -185,10 +185,10 @@ describe("StockManager", () => {
             expect(stocks.length).toEqual(5)
 
             // Item
-            expect(_item.orderReference.path).toEqual(order.documentReference.path)
+            expect(_item.orderReference!.path).toEqual(order.documentReference.path)
             expect(_item.selledBy).toEqual(shop.id)
             expect(_item.productReference!.path).toEqual(product.documentReference.path)
-            expect(_item.skuReference.path).toEqual(sku.documentReference.path)
+            expect(_item.skuReference!.path).toEqual(sku.documentReference.path)
             expect(_item.isCancelled).toEqual(true)
         }, 15000)
     })

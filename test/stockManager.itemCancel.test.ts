@@ -96,7 +96,7 @@ describe("StockManager", () => {
                     const stockTransaction = await stockManager._trade(order, orderItem, transaction)
                     return await stockTransaction.commit()
 				}) as TradeTransaction[]
-				
+
 				orderResult = result[0]
 
                 const shopTradeTransaction: TradeTransaction = (await shop.tradeTransactions.collectionReference.where("orderReference", "==", order.documentReference).get()).docs.map(value => TradeTransaction.fromSnapshot(value) as TradeTransaction)[0]
@@ -131,29 +131,29 @@ describe("StockManager", () => {
                 expect(stocks.length).toEqual(1)
 
                 // Item
-                expect(_item.orderReference.path).toEqual(order.documentReference.path)
+                expect(_item.orderReference!.path).toEqual(order.documentReference.path)
                 expect(_item.selledBy).toEqual(shop.id)
                 expect(_item.productReference!.path).toEqual(product.documentReference.path)
-                expect(_item.skuReference.path).toEqual(sku.documentReference.path)
+                expect(_item.skuReference!.path).toEqual(sku.documentReference.path)
 
             } catch (error) {
                 console.log(error)
             }
         }, 15000)
 
-        test("Success", async () => {			
+        test("Success", async () => {
             const item = orderResult!.itemReference
             const result = await firestore.runTransaction(async (transaction) => {
                 const stockTransaction = await stockManager.itemCancel(order, orderItem, item, transaction)
                 return await stockTransaction.commit()
 			}) as TradeTransaction[]
-			
+
             orderResult = result[0]
-        
+
 
             const shopTradeTransaction: TradeTransaction = await new TradeTransaction(shop.tradeTransactions.collectionReference.doc(orderResult.id)).fetch()
             const userTradeTransaction: TradeTransaction = await new TradeTransaction(user.tradeTransactions.collectionReference.doc(orderResult.id)).fetch()
-            
+
             const _sku = new SKU(sku.documentReference)
             const stocksDataSource = _sku.stocks.collectionReference.where("orderReference", "==", orderResult.orderReference)
             const promiseResult = await Promise.all([_sku.fetch(), stocksDataSource.get()])
@@ -185,10 +185,10 @@ describe("StockManager", () => {
             expect(stocks.length).toEqual(0)
 
             // Item
-            expect(_item.orderReference.path).toEqual(order.documentReference.path)
+            expect(_item.orderReference!.path).toEqual(order.documentReference.path)
             expect(_item.selledBy).toEqual(shop.id)
             expect(_item.productReference!.path).toEqual(product.documentReference.path)
-            expect(_item.skuReference.path).toEqual(sku.documentReference.path)
+            expect(_item.skuReference!.path).toEqual(sku.documentReference.path)
             expect(_item.isCancelled).toEqual(true)
 
         }, 15000)
@@ -215,10 +215,10 @@ describe("StockManager", () => {
                 expect(_sku.inventory.quantity).toEqual(2)
 
                 // Item
-                expect(_item.orderReference.path).toEqual(order.documentReference.path)
+                expect(_item.orderReference!.path).toEqual(order.documentReference.path)
                 expect(_item.selledBy).toEqual(shop.id)
                 expect(_item.productReference!.path).toEqual(product.documentReference.path)
-                expect(_item.skuReference.path).toEqual(sku.documentReference.path)
+                expect(_item.skuReference!.path).toEqual(sku.documentReference.path)
                 expect(_item.isCancelled).toEqual(true)
             }
         }, 15000)
