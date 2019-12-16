@@ -44,20 +44,20 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-    "@1amageek/ballcap-admin": "^0.5.5",
+    "@1amageek/ballcap-admin": "^0.5.6",
     "@types/jest": "^24.0.11",
     "@types/node": "^11.13.4",
-    "@types/stripe": "^6.25.11",
+    "@types/stripe": "^7.13.16",
     "firebase-admin": "^8.8.0",
     "gaxios": "1.8.3",
     "jest": "^24.7.1",
-    "stripe": "^6.30.0",
+    "stripe": "^7.14.0",
     "ts-jest": "^24.0.2",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.3"
   },
   "peerDependencies": {
-    "@1amageek/ballcap-admin": "^0.5.5",
+    "@1amageek/ballcap-admin": "^0.5.6",
     "firebase-admin": "^8.8.0"
   }
 }
