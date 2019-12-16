@@ -9,7 +9,7 @@ export class Product extends Doc {
     @Field selledBy: string = ''
     @Field createdBy: string = ''
     @Field isAvailable: boolean = false
-    @Field isPrivated: boolean = false
+    @Field isPrivate: boolean = false
     @Field metadata?: any
     @SubCollection SKUs: Collection<SKU> = new Collection()
     @SubCollection plans: Collection<Plan> = new Collection()
