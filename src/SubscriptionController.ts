@@ -93,6 +93,13 @@ export class SubscriptionController
 		subscription.createdBy = subscriber.id
 		subscription.startAt = FieldValue.serverTimestamp()
 		subscription.status = SubscriptionStatus.active
+		if (option.metadata) {
+			option.metadata["subscription_id"] = subscription.id
+		} else {
+			option.metadata = {
+				subscription_id: subscription.id
+			}
+		}
 		plans.forEach(plan => {
 			const subscriptionItem: SubscriptionItem = (subscription.items.find(item => item.planReference.path === plan.documentReference.path) || this._SubscriptionItem.init()) as SubscriptionItem
 			subscriptionItem.subscribedBy = subscriber.id
@@ -105,7 +112,6 @@ export class SubscriptionController
 			subscriptionItem.currency = plan.currency
 			subscription.items.push(subscriptionItem)
 		})
-
 		try {
 			return await firestore.runTransaction(async (transaction) => {
 				const subscriptionResult = await block(subscription, option, transaction)
