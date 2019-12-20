@@ -1,12 +1,12 @@
 import { DocumentType, Collection, Timestamp, DocumentReference, Transaction, QuerySnapshot, ModelType } from '@1amageek/ballcap-admin'
-import { ShardType, ShardCharacters, DafaultShardCharacters, randomShard, Balance, TradeTransactionType, BalanceTransactionType, AccountOrDestination, TransactionResult, SubscriptionResult, Inventory, OrderItemType, OrderItemStatus, OrderPaymentStatus, OrderTransferStatus, Interval, Tier, TiersMode, PayoutStatus, TransferStatus, StockType, StockValue } from './commonType'
+import { ShardType, ShardCharacters, DafaultShardCharacters, randomShard, Balance, TradeTransactionType, BalanceTransactionType, AccountOrDestination, TransactionResult, SubscriptionResult, Inventory, OrderItemType, OrderItemStatus, OrderPaymentStatus, OrderTransferStatus, DeliveryStatus, Interval, Tier, TiersMode, PayoutStatus, TransferStatus, StockType, StockValue } from './commonType'
 import { Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult } from './Manager'
 import { SubscriptionController } from './SubscriptionController'
 import { Currency } from './Currency'
 export { Currency, Manager, ReserveResult, CheckoutResult, CheckoutChangeResult, CheckoutCancelResult, TransferResult, TransferCancelResult, SubscriptionController }
 
 
-export { ShardType, ShardCharacters, DafaultShardCharacters, randomShard, Balance, TradeTransactionType, BalanceTransactionType, AccountOrDestination, TransactionResult, SubscriptionResult, Inventory, OrderItemType, OrderItemStatus, OrderPaymentStatus, OrderTransferStatus, Interval, Tier, TiersMode, PayoutStatus, TransferStatus, StockType, StockValue }
+export { ShardType, ShardCharacters, DafaultShardCharacters, randomShard, Balance, TradeTransactionType, BalanceTransactionType, AccountOrDestination, TransactionResult, SubscriptionResult, Inventory, OrderItemType, OrderItemStatus, OrderPaymentStatus, OrderTransferStatus, DeliveryStatus, Interval, Tier, TiersMode, PayoutStatus, TransferStatus, StockType, StockValue }
 
 /// UserProtocol is a protocol that the user must retain to make it tradeable.
 export interface UserProtocol
@@ -156,6 +156,7 @@ export interface OrderProtocol<OrderItem extends OrderItemProtocol> extends Docu
 	currency: Currency
 	amount: number
 	items: OrderItem[]
+	deliveryStatus: DeliveryStatus
 	paymentStatus: OrderPaymentStatus
 	transferStatus: OrderTransferStatus
 	transactionResults: TransactionResult[]

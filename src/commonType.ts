@@ -3,20 +3,20 @@ import { Currency } from './Currency'
 export { Currency }
 
 export type ShardType =
-	"a" | "b" | "c" | "d" | "e" |
-	"f" | "g" | "h" | "i" | "j" |
-	"k" | "l" | "m" | "n" | "o" |
-	"p" | "q" | "r" | "s" | "t" |
-	"u" | "v" | "w" | "x" | "y" |
-	"z"
+	'a' | 'b' | 'c' | 'd' | 'e' |
+	'f' | 'g' | 'h' | 'i' | 'j' |
+	'k' | 'l' | 'm' | 'n' | 'o' |
+	'p' | 'q' | 'r' | 's' | 't' |
+	'u' | 'v' | 'w' | 'x' | 'y' |
+	'z'
 
 export const ShardCharacters: ShardType[] = [
-	"a", "b", "c", "d", "e",
-	"f", "g", "h", "i", "j",
-	"k", "l", "m", "n", "o",
-	"p", "q", "r", "s", "t",
-	"u", "v", "w", "x", "y",
-	"z"
+	'a', 'b', 'c', 'd', 'e',
+	'f', 'g', 'h', 'i', 'j',
+	'k', 'l', 'm', 'n', 'o',
+	'p', 'q', 'r', 's', 't',
+	'u', 'v', 'w', 'x', 'y',
+	'z'
 ]
 
 export const DafaultShardCharacters: ShardType[] = ShardCharacters.slice(0, 10)
@@ -54,7 +54,7 @@ export type TransactionResult = {
 	[key: string]: any
 }
 
-export type AccountOrDestination = string | "platform" | "bank_account"
+export type AccountOrDestination = string | 'platform' | 'bank_account'
 
 export enum StockType {
 	bucket = 'bucket',
@@ -106,6 +106,14 @@ export enum OrderPaymentStatus {
 	cancelled = 'cancelled',
 	paymentFailure = 'failure',
 	cancelFailure = 'cancel_failure'
+}
+
+export enum DeliveryStatus {
+	none = 'none',
+	pending = 'pending',
+	delivering = 'delivering',
+	delivered = 'delivered',
+	failure = 'faiure'
 }
 
 export enum Interval {
