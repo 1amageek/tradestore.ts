@@ -1,9 +1,11 @@
 import * as tradable from '../src/index'
 // tslint:disable-next-line:no-implicit-dependencies
-import * as Stripe from 'stripe'
+import Stripe from 'stripe'
 import * as Config from './config'
 
-export const stripe = new Stripe(Config.STRIPE_API_KEY)
+export const stripe = new Stripe(Config.STRIPE_API_KEY, {
+	apiVersion: '2025-06-30.basil'
+})
 
 export class StripeInvalidPaymentDelegate implements tradable.PaymentDelegate {
 
@@ -16,7 +18,7 @@ export class StripeInvalidPaymentDelegate implements tradable.PaymentDelegate {
         throw new Error("Method not implemented.");
     }
 
-    async pay<U extends tradable.OrderItemProtocol, T extends tradable.OrderProtocol<U>>(currency: tradable.Currency, amount: number, order: T, options: tradable.PaymentOptions) {
+    async charge<U extends tradable.OrderItemProtocol, T extends tradable.OrderProtocol<U>>(currency: tradable.Currency, amount: number, order: T, options: tradable.PaymentOptions) {
         throw new Error("Method not implemented.");
     }
 
@@ -46,6 +48,10 @@ export class StripeInvalidPaymentDelegate implements tradable.PaymentDelegate {
     }
 
     async payoutCancel(currency: tradable.Currency, amount: number, accountID: string, options: tradable.PayoutOptions) {
+        throw new Error("Method not implemented.");
+    }
+
+    async subscribe<U extends tradable.SubscriptionItemProtocol, T extends tradable.SubscriptionProtocol<U>>(subscription: T, options: tradable.SubscriptionOptions): Promise<any> {
         throw new Error("Method not implemented.");
     }
 }

@@ -4,22 +4,24 @@ import * as admin from 'firebase-admin'
 import * as Tradable from '../src/index'
 import * as Config from './config'
 // tslint:disable-next-line:no-implicit-dependencies
-import * as Stripe from 'stripe'
+import Stripe from 'stripe'
 
 import { User } from './models/user'
 import { Product } from './models/product'
-import { Plan } from './models/Plan'
+import { Plan } from './models/plan'
 import { Subscription, SubscriptionItem } from './models/subscription'
 
 import { SubscriptionController } from '../src/SubscriptionController'
 import { StripePaymentDelegate } from './stripePaymentDelegate'
 
-export const stripe = new Stripe(Config.STRIPE_API_KEY)
+export const stripe = new Stripe(Config.STRIPE_API_KEY, {
+	apiVersion: '2025-06-30.basil'
+})
 const secret = require("./secret.json")
 const app = admin.initializeApp({
 	credential: admin.credential.cert(secret)
 })
-initialize(app.firestore())
+initialize(app)
 
 describe("SubscriptionController", () => {
 
@@ -41,30 +43,31 @@ describe("SubscriptionController", () => {
 
 	beforeAll(async () => {
 
-		const productCreateOptions: Stripe.products.IProductCreationOptions = {
+		const productCreateOptions: Stripe.ProductCreateParams = {
 			id: product.id,
-			name: product.id,
-			type: "service"
+			name: product.id
 		}
 		product.metadata = await stripe.products.create(productCreateOptions)
-		const plan0CreateOptions: Stripe.plans.IPlanCreationOptions = {
-			id: plan0.id,
-			amount: plan0.amount,
+		const plan0CreateOptions: Stripe.PriceCreateParams = {
+			unit_amount: plan0.amount,
 			currency: Tradable.Currency.JPY,
-			interval: plan0.interval,
-			interval_count: plan0.intervalCount,
 			product: product.id,
+			recurring: {
+				interval: plan0.interval as Stripe.PriceCreateParams.Recurring.Interval,
+				interval_count: plan0.intervalCount
+			}
 		}
-		plan0.metadata = await stripe.plans.create(plan0CreateOptions)
-		const plan1CreateOptions: Stripe.plans.IPlanCreationOptions = {
-			id: plan1.id,
-			amount: plan1.amount,
+		plan0.metadata = await stripe.prices.create(plan0CreateOptions)
+		const plan1CreateOptions: Stripe.PriceCreateParams = {
+			unit_amount: plan1.amount,
 			currency: Tradable.Currency.JPY,
-			interval: plan1.interval,
-			interval_count: plan1.intervalCount,
 			product: product.id,
+			recurring: {
+				interval: plan1.interval as Stripe.PriceCreateParams.Recurring.Interval,
+				interval_count: plan1.intervalCount
+			}
 		}
-		plan0.metadata = await stripe.plans.create(plan1CreateOptions)
+		plan1.metadata = await stripe.prices.create(plan1CreateOptions)
 		await Promise.all([product.save(), plan0.save(), plan1.save(), user.save()])
 
 	}, 10000)
@@ -78,7 +81,7 @@ describe("SubscriptionController", () => {
 			}
 			try {
 				await controller.subscribe(user, [plan0, plan1], subscriptionOptions, async (subscription, option, transaction) => {
-					const result: Stripe.subscriptions.ISubscription = await controller.delegate!.subscribe(subscription, option)
+					const result: Stripe.Subscription = await controller.delegate!.subscribe(subscription, option)
 					subscription.result = result
 					console.info(result)
 					return subscription

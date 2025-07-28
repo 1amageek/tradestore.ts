@@ -1,15 +1,17 @@
 import * as tradable from '../src/index'
 // tslint:disable-next-line:no-implicit-dependencies
-import * as Stripe from 'stripe'
+import Stripe from 'stripe'
 import * as Config from './config'
 
-export const stripe = new Stripe(Config.STRIPE_API_KEY)
+export const stripe = new Stripe(Config.STRIPE_API_KEY, {
+	apiVersion: '2025-06-30.basil'
+})
 
 export class StripePaymentDelegate implements tradable.PaymentDelegate {
 
 	async authorize<U extends tradable.OrderItemProtocol, T extends tradable.OrderProtocol<U>>(currency: tradable.Currency, amount: number, order: T, options: tradable.PaymentOptions) {
 		const idempotency_key = order.id
-		const data: Stripe.charges.IChargeCreationOptions = {
+		const data: Stripe.ChargeCreateParams = {
 			amount: order.amount,
 			currency: order.currency,
 			capture: false,
@@ -29,7 +31,7 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 
 		try {
 			const charge = await stripe.charges.create(data, {
-				idempotency_key: idempotency_key
+				idempotencyKey: idempotency_key
 			})
 			return charge
 		} catch (error) {
@@ -44,7 +46,7 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 
 	async charge<U extends tradable.OrderItemProtocol, T extends tradable.OrderProtocol<U>>(currency: tradable.Currency, amount: number, order: T, options: tradable.PaymentOptions) {
 		const idempotency_key = order.id
-		const data: Stripe.charges.IChargeCreationOptions = {
+		const data: Stripe.ChargeCreateParams = {
 			amount: order.amount,
 			currency: order.currency,
 			description: `Charge for user/${order.purchasedBy}`
@@ -63,7 +65,7 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 
 		try {
 			const charge = await stripe.charges.create(data, {
-				idempotency_key: idempotency_key
+				idempotencyKey: idempotency_key
 			})
 			return charge
 		} catch (error) {
@@ -75,19 +77,22 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 	async refund<U extends tradable.OrderItemProtocol, T extends tradable.OrderProtocol<U>>(currency: tradable.Currency, amount: number, order: T, options: tradable.PaymentOptions, reason?: string | undefined) {
 		const transactionResults = order.transactionResults
 		const transactionResult = transactionResults[transactionResults.length - 1]
-		const stripeCharge = transactionResult["stripe"] as Stripe.charges.ICharge
+		const stripeCharge = transactionResult["stripe"] as Stripe.Charge
 		const charegeID = stripeCharge.id
 		const idempotency_key = `refund:${order.id}`
 
-		let data: Stripe.refunds.IRefundCreationOptions = {}
+		let data: Stripe.RefundCreateParams = {}
 		data.amount = amount
 		if (reason) {
-			data.reason = reason
+			data.reason = reason as Stripe.RefundCreateParams.Reason
 		}
 
 		try {
-			return await stripe.charges.refund(charegeID, data, {
-				idempotency_key: idempotency_key
+			return await stripe.refunds.create({
+				charge: charegeID,
+				...data
+			}, {
+				idempotencyKey: idempotency_key
 			})
 		} catch (error) {
 			throw error
@@ -98,19 +103,22 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 		const transactionResults = order.transactionResults
 		const transactionResult = transactionResults[transactionResults.length - 1]
 
-		const stripeCharge = transactionResult["stripe"] as Stripe.charges.ICharge
+		const stripeCharge = transactionResult["stripe"] as Stripe.Charge
 		const charegeID = stripeCharge.id
 		const idempotency_key = `refund:${orderItem}`
 
-		let data: Stripe.refunds.IRefundCreationOptions = {}
+		let data: Stripe.RefundCreateParams = {}
 		data.amount = amount
 		if (reason) {
-			data.reason = reason
+			data.reason = reason as Stripe.RefundCreateParams.Reason
 		}
 
 		try {
-			return await stripe.charges.refund(charegeID, data, {
-				idempotency_key: idempotency_key
+			return await stripe.refunds.create({
+				charge: charegeID,
+				...data
+			}, {
+				idempotencyKey: idempotency_key
 			})
 		} catch (error) {
 			throw error
@@ -124,7 +132,7 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 		(currency: tradable.Currency, amount: number, order: Order, toAccount: Account, options: tradable.TransferOptions) {
 		const idempotency_key = order.id
 		const destination = toAccount.accountInformation['stripe']['id']
-		const data: Stripe.transfers.ITransferCreationOptions = {
+		const data: Stripe.TransferCreateParams = {
 			amount: order.amount,
 			currency: order.currency,
 			transfer_group: order.id,
@@ -133,7 +141,7 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 
 		try {
 			const transfer = await stripe.transfers.create(data, {
-				idempotency_key: idempotency_key
+				idempotencyKey: idempotency_key
 			})
 			return transfer
 		} catch (error) {
@@ -160,14 +168,14 @@ export class StripePaymentDelegate implements tradable.PaymentDelegate {
 		}
 		const customer: string = options.customer
 
-		const data: Stripe.subscriptions.ISubscriptionCreationOptions = {
+		const data: Stripe.SubscriptionCreateParams = {
 			customer: customer,
 			trial_from_plan: true
 		}
 
 		data.items = subscription.items.map(item => {
 			return {
-				plan: item.planReference.id,
+				price: item.planReference.id,
 				quantity: item.quantity
 			}
 		})

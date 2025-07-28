@@ -4,7 +4,7 @@ import * as admin from 'firebase-admin'
 import * as Tradable from '../src/index'
 import * as Config from './config'
 // tslint:disable-next-line:no-implicit-dependencies
-import * as Stripe from 'stripe'
+import Stripe from 'stripe'
 
 import { User } from './models/user'
 import { Product } from './models/product'
@@ -17,12 +17,14 @@ import { Account } from './models/account'
 import { OrderManager } from '../src/OrderManager'
 
 
-export const stripe = new Stripe(Config.STRIPE_API_KEY)
+export const stripe = new Stripe(Config.STRIPE_API_KEY, {
+	apiVersion: '2025-06-30.basil'
+})
 const secret = require("./secret.json")
 const app = admin.initializeApp({
     credential: admin.credential.cert(secret)
 })
-initialize(app.firestore())
+initialize(app)
 
 
 describe("OrderManager", () => {
@@ -88,7 +90,7 @@ describe("OrderManager", () => {
     describe("update", () => {
         test("Success", async () => {
             await firestore.runTransaction(async (transaction) => {
-                return new Promise(async (resolve, reject) => {
+                return new Promise<void>(async (resolve, reject) => {
                     orderManager.update(order, {}, {}, transaction)
                     resolve()
                 })
