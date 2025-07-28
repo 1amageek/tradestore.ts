@@ -1,65 +1,65 @@
 {
-  "private": false,
-  "name": "@1amageek/tradestore",
-  "publishConfig": {
-    "access": "public"
-  },
-  "version": "1.0.0",
-  "scripts": {
-    "lint": "./node_modules/.bin/tslint -p tslint.json",
-    "build": "./node_modules/.bin/tsc -d",
-    "test": "jest",
-    "test:emulator": "firebase emulators:exec --only firestore 'npm test'",
-    "prepare": "npm run build",
-    "serve": "npm run build && firebase serve --only functions",
-    "shell": "npm run build && firebase experimental:functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
-  },
-  "description": "Cloud Firestore model framework for TypeScript - Google",
-  "contributors": [
-    {
-      "name": "Norikazu Muramoto",
-      "email": "tmy0x3@icloud.com"
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/1amageek/tradestore.ts.git"
-  },
-  "keywords": [
-    "firestore",
-    "firebase",
-    "tradestore",
-    "model",
-    "typescript"
-  ],
-  "author": "1amageek",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/1amageek/tradestore.ts/issues"
-  },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "dependencies": {
-    "reflect-metadata": "^0.2.2"
-  },
-  "devDependencies": {
-    "@1amageek/ballcap-admin": "^2.0.0",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^24.1.0",
-    "@types/stripe": "^8.0.417",
-    "firebase-admin": "^13.4.0",
-    "gaxios": "7.1.1",
-    "jest": "^30.0.5",
-    "stripe": "^18.3.0",
-    "ts-jest": "^29.4.0",
-    "tslint": "^6.1.3",
-    "typescript": "^5.8.3"
-  },
-  "peerDependencies": {
-    "@1amageek/ballcap-admin": "^0.5.6",
-    "firebase-admin": "^8.8.0"
-  }
+	"private": false,
+	"name": "@1amageek/tradestore",
+	"publishConfig": {
+		"access": "public"
+	},
+	"version": "1.0.0",
+	"scripts": {
+		"lint": "./node_modules/.bin/tslint -p tslint.json",
+		"build": "./node_modules/.bin/tsc -d",
+		"test": "jest",
+		"test:emulator": "firebase emulators:exec --only firestore 'npm test'",
+		"prepare": "npm run build",
+		"serve": "npm run build && firebase serve --only functions",
+		"shell": "npm run build && firebase experimental:functions:shell",
+		"start": "npm run shell",
+		"deploy": "firebase deploy --only functions",
+		"logs": "firebase functions:log"
+	},
+	"description": "Cloud Firestore model framework for TypeScript - Google",
+	"contributors": [
+		{
+			"name": "Norikazu Muramoto",
+			"email": "tmy0x3@icloud.com"
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/1amageek/tradestore.ts.git"
+	},
+	"keywords": [
+		"firestore",
+		"firebase",
+		"tradestore",
+		"model",
+		"typescript"
+	],
+	"author": "1amageek",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/1amageek/tradestore.ts/issues"
+	},
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"dependencies": {
+		"reflect-metadata": "^0.2.2"
+	},
+	"devDependencies": {
+		"@1amageek/ballcap-admin": "^2.0.0",
+		"@types/jest": "^30.0.0",
+		"@types/node": "^24.1.0",
+		"@types/stripe": "^8.0.417",
+		"firebase-admin": "^13.4.0",
+		"gaxios": "7.1.1",
+		"jest": "^30.0.5",
+		"stripe": "^18.3.0",
+		"ts-jest": "^29.4.0",
+		"tslint": "^6.1.3",
+		"typescript": "^5.8.3"
+	},
+	"peerDependencies": {
+		"@1amageek/ballcap-admin": "^2.0.0",
+		"firebase-admin": "^13.4.0"
+	}
 }
