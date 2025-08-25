@@ -113,7 +113,7 @@ export enum DeliveryStatus {
 	pending = 'pending',
 	delivering = 'delivering',
 	delivered = 'delivered',
-	failure = 'faiure'
+	failure = 'failure'
 }
 
 export enum Interval {

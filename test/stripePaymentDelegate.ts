@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 import * as Config from './config'
 
 export const stripe = new Stripe(Config.STRIPE_API_KEY, {
-	apiVersion: '2025-06-30.basil'
+	apiVersion: '2025-07-30.basil'
 })
 
 export class StripePaymentDelegate implements tradable.PaymentDelegate {

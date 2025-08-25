@@ -19,7 +19,7 @@ import { Payout } from './models/payout';
 
 
 export const stripe = new Stripe(Config.STRIPE_API_KEY, {
-	apiVersion: '2025-06-30.basil'
+	apiVersion: '2025-07-30.basil'
 })
 const secret = require("./secret.json")
 const app = admin.initializeApp({
